@@ -5,8 +5,8 @@ const MILLISECONDS_IN_SECOND = 1000;
 const MILLISECONDS_IN_MINUTE = 60 * MILLISECONDS_IN_SECOND;
 
 class ClientManager {
-    clientMapping : { [key: string]: StateMachine} = {};
-    clientTimeouts : { [key: string]: NodeJS.Timeout} = {};
+    clientMapping : {[key: string]: StateMachine} = {};
+    clientTimeouts : {[key: string]: NodeJS.Timeout} = {};
     
     handleClient(chat: Chat, lastClientMessage: Message) {
         // Disabling chat reset for now

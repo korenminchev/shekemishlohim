@@ -12,7 +12,9 @@ class StateMachine {
     }
 
     handleMessage(message: Message): void {
-        this.state = this.state.handle(message);
+        var response = this.state.handle(message);
+        this.chat.sendMessage(response.response);
+        this.state = response.state;
     }
 }
 

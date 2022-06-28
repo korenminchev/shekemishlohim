@@ -1,6 +1,7 @@
 "use strict";
 exports.__esModule = true;
-var qrcode = require('qrcode-terminal');
+// const qrcode = require('qrcode-terminal');
+var qrcode_terminal_1 = require("qrcode-terminal");
 var client_manager_1 = require("./client_manager");
 var whatsapp_web_js_1 = require("whatsapp-web.js");
 function main() {
@@ -10,7 +11,7 @@ function main() {
     });
     var client_manager = new client_manager_1.ClientManager();
     client.on('qr', function (qr) {
-        qrcode.generate(qr, { small: true });
+        qrcode_terminal_1.qrcode.generate(qr, { small: true });
     });
     client.on('ready', function () {
         console.log('Client is ready!');
