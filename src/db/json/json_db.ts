@@ -13,6 +13,12 @@ export class JsonDB implements DB {
     }
 
     public async init(): Promise<void> {
+        if (!fs.existsSync(this.json_path)) {
+            fs.writeFileSync(this.json_path, JSON.stringify({}, null, 2));
+            this.db = {};
+            return;
+        }
+        
         const json_data = fs.readFileSync(this.json_path, 'utf-8');
         this.db = JSON.parse(json_data);
     }
