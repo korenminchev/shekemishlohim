@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "ts-jest": "^28.0.5"
+  },
+  "scripts": {
+    "test:unit": "ENV_FILE=./config/.env.test jest"
+  },
+  "devDependencies": {
+    "@types/jest": "^28.1.3"
+  }
+}
