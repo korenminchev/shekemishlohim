@@ -3,7 +3,7 @@ import { MessageResponse } from "./message_response";
 import { State } from "./state";
 import { WelcomeState } from "./states/welcome";
 
-class StateMachine {
+export class StateMachine {
     chat : Chat;
     state: State;
 
@@ -27,5 +27,3 @@ class StateMachine {
         response.additional_receivers.forEach(receiver => receiver.chat.sendMessage(receiver.response));
     }
 }
-
-export { StateMachine };

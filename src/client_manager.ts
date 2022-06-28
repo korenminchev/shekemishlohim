@@ -4,7 +4,7 @@ import { StateMachine } from "./state_machine/state_machine";
 const MILLISECONDS_IN_SECOND = 1000;
 const MILLISECONDS_IN_MINUTE = 60 * MILLISECONDS_IN_SECOND;
 
-class ClientManager {
+export class ClientManager {
     clientMapping : {[key: string]: StateMachine} = {};
     clientTimeouts : {[key: string]: NodeJS.Timeout} = {};
     
@@ -27,5 +27,3 @@ class ClientManager {
         this.clientMapping[chat.id._serialized].handleMessage(lastClientMessage);
     }
 }
-
-export { ClientManager };

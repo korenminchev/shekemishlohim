@@ -1,4 +1,4 @@
-enum StateId {
+export enum StateId {
     Welcome,
     Register,
     InStore,
@@ -6,5 +6,3 @@ enum StateId {
     DeliveryRequest,
     DeliveryPickedUp
 }
-
-export { StateId };

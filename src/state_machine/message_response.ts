@@ -1,6 +1,6 @@
 import { Chat, Message } from "whatsapp-web.js";
 
-class MessageResponse {
+export class MessageResponse {
     sender_response: Message;
     additional_receivers?: [{chat: Chat, response: Message}];
 
@@ -9,5 +9,3 @@ class MessageResponse {
         this.additional_receivers = additional_receivers;
     }
 }
-
-export { MessageResponse };
