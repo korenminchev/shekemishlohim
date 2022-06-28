@@ -8,7 +8,7 @@ var WelcomeState = /** @class */ (function () {
         this.supported_messages = ["אני בשקם", "אני רוצה משלוח", "משלוח", "בשקם", "ש", "מ"];
     }
     WelcomeState.prototype.handle = function (message) {
-        return { state: this, response: { sender_response: "Welcome to Shekemishlohim Bot!" } };
+        return { next_state: this, response: { sender_response: "Welcome to Shekemishlohim Bot!" } };
     };
     return WelcomeState;
 }());

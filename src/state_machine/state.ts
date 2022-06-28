@@ -5,7 +5,7 @@ interface State {
     state_id: number;
     supported_messages: string[];
 
-    handle(message: Message) : {state: State, response: MessageResponse};
+    handle(message: Message) : {next_state: State, response: MessageResponse};
 }
 
 export { State };

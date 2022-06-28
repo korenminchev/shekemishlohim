@@ -8,8 +8,8 @@ class WelcomeState implements State {
     supported_messages: string[] = ["אני בשקם", "אני רוצה משלוח", "משלוח", "בשקם", "ש", "מ"];
     
 
-    handle(message: Message): {state: State, response: MessageResponse} {
-        return {state: this, response: {sender_response: "Welcome to Shekemishlohim Bot!"}};
+    handle(message: Message): {next_state: State, response: MessageResponse} {
+        return {next_state: this, response: {sender_response: "Welcome to Shekemishlohim Bot!"}};
     }
 }
 
