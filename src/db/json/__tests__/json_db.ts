@@ -1,10 +1,10 @@
 import { User } from '../../../models/user';
 import { JsonDB, RecordNotFound } from '../json_db';
 
-let db: JsonDB = new JsonDB('./db_tests.json');
+JsonDB.createInstance('./db_tests.json');
+var db = JsonDB.getInstance();
 
 beforeAll(async () => {
-    await db.init();
 })
 
 describe('sanity db checks', () => {
@@ -14,7 +14,7 @@ describe('sanity db checks', () => {
     });
   })
 
-  var korenUser = new User("2711", "Koren", 3, "2000");
+  var korenUser = new User("2711", "Koren", 3, 5, "2000");
   it('should create a new user successfully', async () => {
     await db.updateUser(korenUser).then(user => expect(user).toEqual(korenUser));
     await db.recordCount().then(count => expect(count).toEqual(1));

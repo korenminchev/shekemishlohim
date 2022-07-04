@@ -4,12 +4,14 @@ exports.__esModule = true;
 var qrcode_terminal_1 = require("qrcode-terminal");
 var client_manager_1 = require("./client_manager");
 var whatsapp_web_js_1 = require("whatsapp-web.js");
+var json_db_1 = require("./db/json/json_db");
 function main() {
     console.log("Shekemishlohim Bot!");
     var client = new whatsapp_web_js_1.Client({
         authStrategy: new whatsapp_web_js_1.LocalAuth()
     });
     var client_manager = new client_manager_1.ClientManager();
+    json_db_1.JsonDB.createInstance('shekem_db.json');
     client.on('qr', function (qr) {
         qrcode_terminal_1.qrcode.generate(qr, { small: true });
     });

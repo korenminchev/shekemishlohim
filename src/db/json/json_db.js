@@ -36,41 +36,72 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.WelcomeState = void 0;
-var state_ids_1 = require("./state_ids");
-var message_response_1 = require("../message_response");
-var json_db_1 = require("../../db/json/json_db");
-var register_1 = require("./register");
-var state_response_1 = require("../state_response");
-var WelcomeState = /** @class */ (function () {
-    function WelcomeState() {
-        this.state_id = state_ids_1.StateId.Welcome;
-        this.supported_messages = ["אני בשקם", "אני רוצה משלוח", "משלוח", "בשקם", "ש", "מ"];
+exports.RecordNotFound = exports.JsonDB = void 0;
+var db_1 = require("../db");
+exports.RecordNotFound = db_1.RecordNotFound;
+var fs = require("fs");
+var JsonDB = /** @class */ (function () {
+    function JsonDB(json_path) {
+        JsonDB.db = {};
+        JsonDB.json_path = json_path;
     }
-    WelcomeState.prototype.onEnter = function () {
-        return null;
-    };
-    WelcomeState.prototype.handle = function (message, user_id) {
+    JsonDB.createInstance = function (json_path) {
         return __awaiter(this, void 0, void 0, function () {
-            var response;
-            var _this = this;
+            var json_data;
             return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, json_db_1.JsonDB.getInstance().getUser(user_id).then(function (user) {
-                            console.log("User: " + user);
-                            response = new state_response_1.StateResponse(_this, new message_response_1.MessageResponse("\u05E9\u05DC\u05D5\u05DD ".concat(user.name)));
-                        })["catch"](function () {
-                            console.log("User not found");
-                            response = new state_response_1.StateResponse(new register_1.RegisterState(), new message_response_1.MessageResponse("Welcome to Shekemishlohim"));
-                        })];
-                    case 1:
-                        _a.sent();
-                        console.log(response);
-                        return [2 /*return*/, response];
+                if (JsonDB.instance) {
+                    return [2 /*return*/];
                 }
+                JsonDB.instance = new JsonDB(json_path);
+                if (!fs.existsSync(JsonDB.json_path)) {
+                    fs.writeFileSync(JsonDB.json_path, JSON.stringify({}, null, 2));
+                    JsonDB.db = {};
+                    return [2 /*return*/];
+                }
+                json_data = fs.readFileSync(JsonDB.json_path, 'utf-8');
+                JsonDB.db = JSON.parse(json_data);
+                return [2 /*return*/];
             });
         });
     };
-    return WelcomeState;
+    JsonDB.getInstance = function () {
+        return JsonDB.instance;
+    };
+    // No need to read json everytime because data is cached on write
+    JsonDB.prototype.getUser = function (phone_number) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, new Promise(function (resolve, reject) {
+                        if (JsonDB.db[phone_number]) {
+                            resolve(JsonDB.db[phone_number]);
+                        }
+                        else {
+                            reject(new db_1.RecordNotFound());
+                        }
+                    })];
+            });
+        });
+    };
+    JsonDB.prototype.updateUser = function (user) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, new Promise(function (resolve) {
+                        JsonDB.db[user.phone_number] = user;
+                        fs.writeFileSync(JsonDB.json_path, JSON.stringify(JsonDB.db, null, 2));
+                        resolve(user);
+                    })];
+            });
+        });
+    };
+    JsonDB.prototype.recordCount = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, new Promise(function (resolve) {
+                        resolve(Object.keys(JsonDB.db).length);
+                    })];
+            });
+        });
+    };
+    return JsonDB;
 }());
-exports.WelcomeState = WelcomeState;
+exports.JsonDB = JsonDB;

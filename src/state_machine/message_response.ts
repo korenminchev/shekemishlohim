@@ -1,10 +1,10 @@
-import { Chat, Message } from "whatsapp-web.js";
+import { Chat, MessageContent } from "whatsapp-web.js";
 
 export class MessageResponse {
-    sender_response: Message;
-    additional_receivers?: [{chat: Chat, response: Message}];
+    sender_response: MessageContent;
+    additional_receivers?: [{chat: Chat, response: MessageContent}];
 
-    constructor(message: Message, additional_receivers?: [{chat: Chat, response: Message}]) {
+    constructor(message: MessageContent, additional_receivers?: [{chat: Chat, response: MessageContent}]) {
         this.sender_response = message;
         this.additional_receivers = additional_receivers;
     }

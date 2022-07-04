@@ -9,5 +9,4 @@ var StateId;
     StateId[StateId["ItemsDelivered"] = 3] = "ItemsDelivered";
     StateId[StateId["DeliveryRequest"] = 4] = "DeliveryRequest";
     StateId[StateId["DeliveryPickedUp"] = 5] = "DeliveryPickedUp";
-})(StateId || (StateId = {}));
-exports.StateId = StateId;
+})(StateId = exports.StateId || (exports.StateId = {}));

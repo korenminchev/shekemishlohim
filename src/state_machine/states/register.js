@@ -36,41 +36,50 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.WelcomeState = void 0;
+exports.RegisterState = void 0;
 var state_ids_1 = require("./state_ids");
 var message_response_1 = require("../message_response");
 var json_db_1 = require("../../db/json/json_db");
-var register_1 = require("./register");
+var user_1 = require("../../models/user");
+var welcome_1 = require("./welcome");
 var state_response_1 = require("../state_response");
-var WelcomeState = /** @class */ (function () {
-    function WelcomeState() {
-        this.state_id = state_ids_1.StateId.Welcome;
-        this.supported_messages = ["אני בשקם", "אני רוצה משלוח", "משלוח", "בשקם", "ש", "מ"];
+var RegisterStage;
+(function (RegisterStage) {
+    RegisterStage[RegisterStage["Begin"] = 0] = "Begin";
+    RegisterStage[RegisterStage["WaitingForName"] = 1] = "WaitingForName";
+    RegisterStage[RegisterStage["WaitingForFloor"] = 2] = "WaitingForFloor";
+})(RegisterStage || (RegisterStage = {}));
+var RegisterState = /** @class */ (function () {
+    function RegisterState() {
+        this.state_id = state_ids_1.StateId.Register;
+        this.supported_messages = [];
+        this.stage = RegisterStage.Begin;
     }
-    WelcomeState.prototype.onEnter = function () {
-        return null;
+    RegisterState.prototype.onEnter = function () {
+        this.stage = RegisterStage.WaitingForName;
+        return { sender_response: "What's your name?" };
     };
-    WelcomeState.prototype.handle = function (message, user_id) {
+    RegisterState.prototype.handle = function (message, user_id) {
         return __awaiter(this, void 0, void 0, function () {
-            var response;
-            var _this = this;
             return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, json_db_1.JsonDB.getInstance().getUser(user_id).then(function (user) {
-                            console.log("User: " + user);
-                            response = new state_response_1.StateResponse(_this, new message_response_1.MessageResponse("\u05E9\u05DC\u05D5\u05DD ".concat(user.name)));
-                        })["catch"](function () {
-                            console.log("User not found");
-                            response = new state_response_1.StateResponse(new register_1.RegisterState(), new message_response_1.MessageResponse("Welcome to Shekemishlohim"));
-                        })];
-                    case 1:
-                        _a.sent();
-                        console.log(response);
-                        return [2 /*return*/, response];
+                switch (this.stage) {
+                    case RegisterStage.WaitingForName:
+                        this.phone_number = user_id;
+                        this.name = message.body;
+                        this.stage = RegisterStage.WaitingForFloor;
+                        return [2 /*return*/, new state_response_1.StateResponse(this, new message_response_1.MessageResponse("What floor are you from?"))];
+                    case RegisterStage.WaitingForFloor:
+                        this.floor = parseInt(message.body);
+                        if (isNaN(this.floor) || this.floor > 6) {
+                            return [2 /*return*/, new state_response_1.StateResponse(this, new message_response_1.MessageResponse("Invalid floor number. What floor are you from?"))];
+                        }
+                        json_db_1.JsonDB.getInstance().updateUser(new user_1.User(user_id, this.name, 2, this.floor));
+                        return [2 /*return*/, new state_response_1.StateResponse(new welcome_1.WelcomeState(), new message_response_1.MessageResponse("Thanks for registering!"))];
                 }
+                return [2 /*return*/];
             });
         });
     };
-    return WelcomeState;
+    return RegisterState;
 }());
-exports.WelcomeState = WelcomeState;
+exports.RegisterState = RegisterState;

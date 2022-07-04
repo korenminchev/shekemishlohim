@@ -2,6 +2,7 @@
 import { qrcode } from 'qrcode-terminal';
 import { ClientManager } from './client_manager';
 import { Client, LocalAuth, Chat, Message} from 'whatsapp-web.js'
+import { JsonDB } from './db/json/json_db';
 
 function main() {
     console.log("Shekemishlohim Bot!");
@@ -10,6 +11,8 @@ function main() {
     });
     
     var client_manager = new ClientManager();
+
+    JsonDB.createInstance('shekem_db.json');
 
     client.on('qr', (qr: any) => {
         qrcode.generate(qr, {small: true});
