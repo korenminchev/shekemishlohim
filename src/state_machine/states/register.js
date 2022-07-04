@@ -49,6 +49,10 @@ var RegisterStage;
     RegisterStage[RegisterStage["WaitingForName"] = 1] = "WaitingForName";
     RegisterStage[RegisterStage["WaitingForFloor"] = 2] = "WaitingForFloor";
 })(RegisterStage || (RegisterStage = {}));
+var NAME_REQUEST = "\u05D0\u05D6 \u05D1\u05D5\u05D0\u05D5 \u05E0\u05EA\u05D7\u05D9\u05DC, \u05E8\u05E7 2 \u05E4\u05E8\u05D8\u05D9\u05DD \u05E7\u05D8\u05E0\u05D9\u05DD!\n\u05D0\u05D9\u05DA \u05E7\u05D5\u05E8\u05D0\u05D9\u05DD \u05DC\u05DA?";
+var FLOOR_REQUEST = "?\u05D1\u05D0\u05D9\u05D6\u05D4 \u05E7\u05D5\u05DE\u05D4 \u05D0\u05EA.\u05D4\n(1 - 6)\n(\u05D2) - \u05D2\u05E0\u05E1\u05D9\u05E1\n(\u05E1) - \u05E1\u05DE\u05DA\n(\u05D8) - \u05D8\u05D5\u05E4\u05D6";
+var INVALID_FLOOD = "\u05E1\u05D5\u05E8\u05D9, \u05DC\u05D0 \u05D4\u05D1\u05E0\u05EA\u05D9 \u05D1\u05D0\u05D9\u05D6\u05D4 \u05E7\u05D5\u05DE\u05D4 \u05D0\u05EA.\u05D4 :(\n" + FLOOR_REQUEST;
+var THANKS_FOR_REGISTERING = "\u05EA\u05D5\u05D3\u05D4 \u05E2\u05DC \u05D4\u05D4\u05E8\u05E9\u05DE\u05D4!\n\n\u05D4\u05E9\u05D9\u05E8\u05D5\u05EA \u05E2\u05D3\u05D9\u05D9\u05DF \u05DC\u05D0 \u05E4\u05E2\u05D9\u05DC \u05D0\u05D1\u05DC \u05E2\u05D5\u05D1\u05D3\u05D9\u05DD \u05E2\u05DC \u05D6\u05D4 \u05E7\u05E9\u05D4 \u05D5\u05E0\u05E9\u05DC\u05D7 \u05D4\u05D5\u05D3\u05E2\u05D4 \u05D1\u05E8\u05D2\u05E2 \u05E9\u05D4\u05DB\u05DC \u05D9\u05D4\u05D9\u05D4 \u05DE\u05D5\u05DB\u05DF!";
 var RegisterState = /** @class */ (function () {
     function RegisterState() {
         this.state_id = state_ids_1.StateId.Register;
@@ -57,7 +61,7 @@ var RegisterState = /** @class */ (function () {
     }
     RegisterState.prototype.onEnter = function () {
         this.stage = RegisterStage.WaitingForName;
-        return { sender_response: "What's your name?" };
+        return { sender_response: NAME_REQUEST };
     };
     RegisterState.prototype.handle = function (message, user_id) {
         return __awaiter(this, void 0, void 0, function () {
@@ -67,14 +71,14 @@ var RegisterState = /** @class */ (function () {
                         this.phone_number = user_id;
                         this.name = message.body;
                         this.stage = RegisterStage.WaitingForFloor;
-                        return [2 /*return*/, new state_response_1.StateResponse(this, new message_response_1.MessageResponse("What floor are you from?"))];
+                        return [2 /*return*/, new state_response_1.StateResponse(this, new message_response_1.MessageResponse(FLOOR_REQUEST))];
                     case RegisterStage.WaitingForFloor:
                         this.floor = parseInt(message.body);
                         if (isNaN(this.floor) || this.floor > 6) {
-                            return [2 /*return*/, new state_response_1.StateResponse(this, new message_response_1.MessageResponse("Invalid floor number. What floor are you from?"))];
+                            return [2 /*return*/, new state_response_1.StateResponse(this, new message_response_1.MessageResponse(INVALID_FLOOD))];
                         }
                         json_db_1.JsonDB.getInstance().updateUser(new user_1.User(user_id, this.name, 2, this.floor));
-                        return [2 /*return*/, new state_response_1.StateResponse(new welcome_1.WelcomeState(), new message_response_1.MessageResponse("Thanks for registering!"))];
+                        return [2 /*return*/, new state_response_1.StateResponse(new welcome_1.WelcomeState(), new message_response_1.MessageResponse(THANKS_FOR_REGISTERING))];
                 }
                 return [2 /*return*/];
             });

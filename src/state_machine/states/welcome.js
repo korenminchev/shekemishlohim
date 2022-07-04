@@ -42,6 +42,7 @@ var message_response_1 = require("../message_response");
 var json_db_1 = require("../../db/json/json_db");
 var register_1 = require("./register");
 var state_response_1 = require("../state_response");
+var EXPLAINATION_MESSAGE = "\u05D4\u05D9\u05D9! \u05D0\u05D6 \u05DE\u05D4 \u05D6\u05D4 \u05E9\u05E7\u05DE\u05E9\u05DC\u05D5\u05D7\u05D9\u05DD?\n\u05DE\u05DB\u05D9\u05E8\u05D9\u05DD \u05D0\u05EA \u05D6\u05D4 \u05DB\u05E9\u05D0\u05EA\u05DD \u05D1\u05DE\u05E9\u05E8\u05D3 \u05D5\u05D1\u05D0 \u05DC\u05DB\u05DD \u05DE\u05E9\u05D4\u05D5 \u05DE\u05D4\u05E9\u05E7\u05DD \u05D0\u05D1\u05DC \u05D0\u05D9\u05DF \u05DC\u05DB\u05DD \u05DB\u05D5\u05D7 \u05DC\u05E6\u05D0\u05EA \u05DE\u05DE\u05E6\u05D5\u05D1 \u05D1\u05E9\u05D1\u05D9\u05DC \u05D6\u05D4?\n\u05E2\u05DD \u05E9\u05E7\u05DE\u05E9\u05DC\u05D5\u05D7\u05D9\u05DD \u05D0\u05E0\u05E9\u05D9\u05DD \u05E9\u05DB\u05D1\u05E8 \u05E0\u05DE\u05E6\u05D0\u05D9\u05DD \u05D1\u05E9\u05E7\u05DD \u05D9\u05D5\u05DB\u05DC\u05D5 \u05DC\u05E7\u05D7\u05EA \u05D4\u05D6\u05DE\u05E0\u05D4 \u05E9\u05DC\u05DB\u05DD \u05D5\u05DC\u05D4\u05D1\u05D9\u05D0 \u05D0\u05D5\u05EA\u05D4 \u05E7\u05E8\u05D5\u05D1 \u05DE\u05E1\u05E4\u05D9\u05E7 \u05D0\u05DC\u05D9\u05DB\u05DD!\n\u05DB\u05DC \u05D6\u05D4 \u05D1\u05E6\u05D9\u05E4\u05D9\u05D9\u05D4 \u05E9\u05DB\u05E9\u05D0\u05EA\u05DD \u05EA\u05D4\u05D9\u05D5 \u05E9\u05DD \u05D0\u05D6 \u05EA\u05E7\u05D7\u05D5 \u05DE\u05D3\u05D9 \u05E4\u05E2\u05DD \u05DC\u05DE\u05D9\u05E9\u05D4\u05D5 \u05E9\u05E7\u05D9\u05EA \u05DC\u05D1\u05E0\u05D9\u05D9\u05DF ;)";
 var WelcomeState = /** @class */ (function () {
     function WelcomeState() {
         this.state_id = state_ids_1.StateId.Welcome;
@@ -61,7 +62,7 @@ var WelcomeState = /** @class */ (function () {
                             response = new state_response_1.StateResponse(_this, new message_response_1.MessageResponse("\u05E9\u05DC\u05D5\u05DD ".concat(user.name)));
                         })["catch"](function () {
                             console.log("User not found");
-                            response = new state_response_1.StateResponse(new register_1.RegisterState(), new message_response_1.MessageResponse("Welcome to Shekemishlohim"));
+                            response = new state_response_1.StateResponse(new register_1.RegisterState(), new message_response_1.MessageResponse(EXPLAINATION_MESSAGE));
                         })];
                     case 1:
                         _a.sent();
