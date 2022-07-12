@@ -26,7 +26,6 @@ function main() {
         message.getChat().then((chat: Chat) => {
             client_manager.handleClient(chat, message);
         })
-        // message.reply('Hello!');
     });
     
     client.initialize();
