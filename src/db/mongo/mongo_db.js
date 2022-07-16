@@ -36,42 +36,63 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.WelcomeState = void 0;
-var state_ids_1 = require("./state_ids");
-var message_response_1 = require("../message_response");
-var register_1 = require("./register");
-var state_response_1 = require("../state_response");
-var EXPLAINATION_MESSAGE = "\u05D4\u05D9\u05D9! \u05D0\u05D6 \u05DE\u05D4 \u05D6\u05D4 \u05E9\u05E7\u05DE\u05E9\u05DC\u05D5\u05D7\u05D9\u05DD?\n\u05DE\u05DB\u05D9\u05E8\u05D9\u05DD \u05D0\u05EA \u05D6\u05D4 \u05DB\u05E9\u05D0\u05EA\u05DD \u05D1\u05DE\u05E9\u05E8\u05D3 \u05D5\u05D1\u05D0 \u05DC\u05DB\u05DD \u05DE\u05E9\u05D4\u05D5 \u05DE\u05D4\u05E9\u05E7\u05DD \u05D0\u05D1\u05DC \u05D0\u05D9\u05DF \u05DC\u05DB\u05DD \u05DB\u05D5\u05D7 \u05DC\u05E6\u05D0\u05EA \u05DE\u05DE\u05E6\u05D5\u05D1 \u05D1\u05E9\u05D1\u05D9\u05DC \u05D6\u05D4?\n\u05E2\u05DD \u05E9\u05E7\u05DE\u05E9\u05DC\u05D5\u05D7\u05D9\u05DD \u05D0\u05E0\u05E9\u05D9\u05DD \u05E9\u05DB\u05D1\u05E8 \u05E0\u05DE\u05E6\u05D0\u05D9\u05DD \u05D1\u05E9\u05E7\u05DD \u05D9\u05D5\u05DB\u05DC\u05D5 \u05DC\u05E7\u05D7\u05EA \u05D4\u05D6\u05DE\u05E0\u05D4 \u05E9\u05DC\u05DB\u05DD \u05D5\u05DC\u05D4\u05D1\u05D9\u05D0 \u05D0\u05D5\u05EA\u05D4 \u05E7\u05E8\u05D5\u05D1 \u05DE\u05E1\u05E4\u05D9\u05E7 \u05D0\u05DC\u05D9\u05DB\u05DD!\n\u05DB\u05DC \u05D6\u05D4 \u05D1\u05E6\u05D9\u05E4\u05D9\u05D9\u05D4 \u05E9\u05DB\u05E9\u05D0\u05EA\u05DD \u05EA\u05D4\u05D9\u05D5 \u05E9\u05DD \u05D0\u05D6 \u05EA\u05E7\u05D7\u05D5 \u05DE\u05D3\u05D9 \u05E4\u05E2\u05DD \u05DC\u05DE\u05D9\u05E9\u05D4\u05D5 \u05E9\u05E7\u05D9\u05EA \u05DC\u05D1\u05E0\u05D9\u05D9\u05DF ;)";
-var WelcomeState = /** @class */ (function () {
-    function WelcomeState(db) {
-        this.state_id = state_ids_1.StateId.Welcome;
-        this.supported_messages = ["אני בשקם", "אני רוצה משלוח", "משלוח", "בשקם", "ש", "מ"];
-        this.db = db;
+exports.MongoDB = void 0;
+var user_1 = require("../../models/user");
+var mongoDB = require("mongodb");
+var MongoDB = /** @class */ (function () {
+    function MongoDB() {
     }
-    WelcomeState.prototype.onEnter = function () {
-        return null;
-    };
-    WelcomeState.prototype.handle = function (message, user_id) {
+    MongoDB.prototype.init = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var response;
-            var _this = this;
+            var client;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.db.getUser(user_id).then(function (user) {
-                            console.log("User: " + user);
-                            response = new state_response_1.StateResponse(_this, new message_response_1.MessageResponse("\u05E9\u05DC\u05D5\u05DD ".concat(user.name)));
-                        })["catch"](function () {
-                            console.log("User not found");
-                            response = new state_response_1.StateResponse(new register_1.RegisterState(_this.db), new message_response_1.MessageResponse(EXPLAINATION_MESSAGE));
-                        })];
+                    case 0:
+                        client = new mongoDB.MongoClient("mongodb://localhost:27017");
+                        return [4 /*yield*/, client.connect()];
                     case 1:
                         _a.sent();
-                        console.log(response);
-                        return [2 /*return*/, response];
+                        this.db = client.db("shekemishlohim");
+                        return [2 /*return*/];
                 }
             });
         });
     };
-    return WelcomeState;
+    MongoDB.prototype.getUser = function (phone_number) {
+        return __awaiter(this, void 0, void 0, function () {
+            var doc;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.db.collection("users").findOne({ phone_number: phone_number })];
+                    case 1:
+                        doc = _a.sent();
+                        return [2 /*return*/, new user_1.User(doc.phone_number, doc.name, doc.token_count, doc.floor, doc.office_number)];
+                }
+            });
+        });
+    };
+    MongoDB.prototype.updateUser = function (user) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.db.collection("users").updateOne({ phone_number: user.phone_number }, {
+                            $set: {
+                                name: user.name,
+                                token_count: user.token_count,
+                                floor: user.floor,
+                                office_number: user.office_number
+                            }, options: { upsert: true }
+                        })];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/, user];
+                }
+            });
+        });
+    };
+    MongoDB.prototype.userCount = function () {
+        return this.db.collection("users").countDocuments();
+    };
+    return MongoDB;
 }());
-exports.WelcomeState = WelcomeState;
+exports.MongoDB = MongoDB;

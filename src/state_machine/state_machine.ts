@@ -1,4 +1,5 @@
 import { Chat, Message } from "whatsapp-web.js";
+import { DB } from "../db/db";
 import { MessageResponse } from "./message_response";
 import { State } from "./state";
 import { WelcomeState } from "./states/welcome";
@@ -6,10 +7,12 @@ import { WelcomeState } from "./states/welcome";
 export class StateMachine {
     chat : Chat;
     state: State;
+    db: DB;
 
-    constructor(chat: Chat) {
+    constructor(chat: Chat, db: DB) {
         this.chat = chat;
-        this.state = new WelcomeState();
+        this.db = db;
+        this.state = new WelcomeState(db);
     }
 
     async handleMessage(message: Message): Promise<void> {

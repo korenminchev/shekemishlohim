@@ -39,9 +39,10 @@ exports.__esModule = true;
 exports.StateMachine = void 0;
 var welcome_1 = require("./states/welcome");
 var StateMachine = /** @class */ (function () {
-    function StateMachine(chat) {
+    function StateMachine(chat, db) {
         this.chat = chat;
-        this.state = new welcome_1.WelcomeState();
+        this.db = db;
+        this.state = new welcome_1.WelcomeState(db);
     }
     StateMachine.prototype.handleMessage = function (message) {
         return __awaiter(this, void 0, void 0, function () {

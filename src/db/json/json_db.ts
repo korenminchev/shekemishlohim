@@ -51,7 +51,7 @@ export class JsonDB implements DB {
         });
     }
 
-    public async recordCount(): Promise<number> {
+    public async userCount(): Promise<number> {
         return new Promise((resolve) => {
             resolve(Object.keys(JsonDB.db).length);
         });

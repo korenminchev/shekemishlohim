@@ -39,7 +39,6 @@ exports.__esModule = true;
 exports.RegisterState = void 0;
 var state_ids_1 = require("./state_ids");
 var message_response_1 = require("../message_response");
-var json_db_1 = require("../../db/json/json_db");
 var user_1 = require("../../models/user");
 var welcome_1 = require("./welcome");
 var state_response_1 = require("../state_response");
@@ -54,9 +53,10 @@ var FLOOR_REQUEST = "?\u05D1\u05D0\u05D9\u05D6\u05D4 \u05E7\u05D5\u05DE\u05D4 \u
 var INVALID_FLOOD = "\u05E1\u05D5\u05E8\u05D9, \u05DC\u05D0 \u05D4\u05D1\u05E0\u05EA\u05D9 \u05D1\u05D0\u05D9\u05D6\u05D4 \u05E7\u05D5\u05DE\u05D4 \u05D0\u05EA.\u05D4 :(\n" + FLOOR_REQUEST;
 var THANKS_FOR_REGISTERING = "\u05EA\u05D5\u05D3\u05D4 \u05E2\u05DC \u05D4\u05D4\u05E8\u05E9\u05DE\u05D4!\n\n\u05D4\u05E9\u05D9\u05E8\u05D5\u05EA \u05E2\u05D3\u05D9\u05D9\u05DF \u05DC\u05D0 \u05E4\u05E2\u05D9\u05DC \u05D0\u05D1\u05DC \u05E2\u05D5\u05D1\u05D3\u05D9\u05DD \u05E2\u05DC \u05D6\u05D4 \u05E7\u05E9\u05D4 \u05D5\u05E0\u05E9\u05DC\u05D7 \u05D4\u05D5\u05D3\u05E2\u05D4 \u05D1\u05E8\u05D2\u05E2 \u05E9\u05D4\u05DB\u05DC \u05D9\u05D4\u05D9\u05D4 \u05DE\u05D5\u05DB\u05DF!";
 var RegisterState = /** @class */ (function () {
-    function RegisterState() {
+    function RegisterState(db) {
         this.state_id = state_ids_1.StateId.Register;
         this.supported_messages = [];
+        this.db = db;
         this.stage = RegisterStage.Begin;
     }
     RegisterState.prototype.onEnter = function () {
@@ -77,8 +77,8 @@ var RegisterState = /** @class */ (function () {
                         if (isNaN(this.floor) || this.floor > 6) {
                             return [2 /*return*/, new state_response_1.StateResponse(this, new message_response_1.MessageResponse(INVALID_FLOOD))];
                         }
-                        json_db_1.JsonDB.getInstance().updateUser(new user_1.User(user_id, this.name, 2, this.floor));
-                        return [2 /*return*/, new state_response_1.StateResponse(new welcome_1.WelcomeState(), new message_response_1.MessageResponse(THANKS_FOR_REGISTERING))];
+                        this.db.updateUser(new user_1.User(user_id, this.name, 2, this.floor));
+                        return [2 /*return*/, new state_response_1.StateResponse(new welcome_1.WelcomeState(this.db), new message_response_1.MessageResponse(THANKS_FOR_REGISTERING))];
                 }
                 return [2 /*return*/];
             });

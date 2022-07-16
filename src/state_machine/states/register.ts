@@ -2,10 +2,10 @@ import { State } from "../state";
 import { StateId } from "./state_ids";
 import { Message } from "whatsapp-web.js";
 import { MessageResponse } from "../message_response";
-import { JsonDB } from "../../db/json/json_db";
 import { User } from "../../models/user";
 import { WelcomeState } from "./welcome";
 import { StateResponse } from "../state_response";
+import { DB } from "../../db/db";
 
 enum RegisterStage {
     Begin,
@@ -29,12 +29,14 @@ var THANKS_FOR_REGISTERING = `תודה על ההרשמה!\n
 export class RegisterState implements State {
     state_id = StateId.Register;
     supported_messages = [];
+    db: DB;
     stage: RegisterStage;
     phone_number: string;
     name: string;
     floor: number;
 
-    constructor () {
+    constructor (db: DB) {
+        this.db = db;
         this.stage = RegisterStage.Begin;
     }
 
@@ -57,8 +59,8 @@ export class RegisterState implements State {
                 return new StateResponse(this, new MessageResponse(INVALID_FLOOD));
             }
             
-            JsonDB.getInstance().updateUser(new User(user_id, this.name, 2, this.floor));
-            return new StateResponse(new WelcomeState(), new MessageResponse(THANKS_FOR_REGISTERING));
+            this.db.updateUser(new User(user_id, this.name, 2, this.floor));
+            return new StateResponse(new WelcomeState(this.db), new MessageResponse(THANKS_FOR_REGISTERING));
         }
     }
 }
