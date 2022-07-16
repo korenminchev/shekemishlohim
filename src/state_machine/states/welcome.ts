@@ -27,13 +27,10 @@ export class WelcomeState implements State {
     async handle(message: Message, user_id: string): Promise<StateResponse> {
         var response;
         await this.db.getUser(user_id).then(user => {
-            console.log("User: " + user);
             response = new StateResponse(this, new MessageResponse(`היי ${user.name} :)\n${MORE_INFO}`));
         }).catch(() => {
-            console.log("User not found");
             response = new StateResponse(new RegisterState(this.db), new MessageResponse(EXPLAINATION_MESSAGE));
         });
-        console.log(response);
         return response;
     }
 }

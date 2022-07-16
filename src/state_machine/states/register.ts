@@ -59,7 +59,6 @@ export class RegisterState implements State {
         case RegisterStage.WaitingForFloor:
             var floor: any = parseInt(message.body);
             if (isNaN(floor)) {
-                console.log(message.body);
                 switch (message.body) {
                 case "ג":
                     floor = 'g';
@@ -80,6 +79,7 @@ export class RegisterState implements State {
                 }
             }
             this.db.createUser(new User(user_id, this.name, 2, floor));
+            console.log(`User ${user_id} registered with name ${this.name} and floor ${floor}`);
             return new StateResponse(new WelcomeState(this.db), new MessageResponse(THANKS_FOR_REGISTERING + "\n" + MORE_INFO));
         }
     }

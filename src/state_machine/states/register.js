@@ -77,7 +77,6 @@ var RegisterState = /** @class */ (function () {
                     case RegisterStage.WaitingForFloor:
                         floor = parseInt(message.body);
                         if (isNaN(floor)) {
-                            console.log(message.body);
                             switch (message.body) {
                                 case "ג":
                                     floor = 'g';
@@ -98,6 +97,7 @@ var RegisterState = /** @class */ (function () {
                             }
                         }
                         this.db.createUser(new user_1.User(user_id, this.name, 2, floor));
+                        console.log("User ".concat(user_id, " registered with name ").concat(this.name, " and floor ").concat(floor));
                         return [2 /*return*/, new state_response_1.StateResponse(new welcome_1.WelcomeState(this.db), new message_response_1.MessageResponse(THANKS_FOR_REGISTERING + "\n" + exports.MORE_INFO))];
                 }
                 return [2 /*return*/];

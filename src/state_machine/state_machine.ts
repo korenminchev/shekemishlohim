@@ -1,24 +1,26 @@
-import { Chat, Message } from "whatsapp-web.js";
+import { Chat, Message, Contact } from "whatsapp-web.js";
 import { DB } from "../db/db";
 import { MessageResponse } from "./message_response";
 import { State } from "./state";
 import { WelcomeState } from "./states/welcome";
 
 export class StateMachine {
-    chat : Chat;
+    chat: Chat;
+    phone_number: string;
     state: State;
     db: DB;
 
     constructor(chat: Chat, db: DB) {
         this.chat = chat;
         this.db = db;
+        this.chat.getContact().then((contact: Contact) => {
+            this.phone_number = contact.number;
+        });
         this.state = new WelcomeState(db);
     }
 
     async handleMessage(message: Message): Promise<void> {
-        console.log("Handling message: " + message.body);
-        var state_result = await this.state.handle(message, this.chat.id._serialized);
-        console.log("State result: " + state_result);
+        var state_result = await this.state.handle(message, this.phone_number);
         this.respond(state_result.response);
 
         if (state_result.next_state == this.state) {
