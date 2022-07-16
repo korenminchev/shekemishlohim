@@ -2,7 +2,7 @@ import { State } from "../state";
 import { StateId } from "./state_ids";
 import { Message } from "whatsapp-web.js";
 import { MessageResponse } from "../message_response";
-import { RegisterState } from "./register";
+import { MORE_INFO, RegisterState } from "./register";
 import { StateResponse } from "../state_response";
 import { DB } from "../../db/db";
 
@@ -24,11 +24,11 @@ export class WelcomeState implements State {
         return null;
     }
 
-    async handle(message: Message, user_id: string): Promise<StateResponse>{
+    async handle(message: Message, user_id: string): Promise<StateResponse> {
         var response;
         await this.db.getUser(user_id).then(user => {
             console.log("User: " + user);
-            response = new StateResponse(this, new MessageResponse(`שלום ${user.name}`));
+            response = new StateResponse(this, new MessageResponse(`היי ${user.name} :)\n${MORE_INFO}`));
         }).catch(() => {
             console.log("User not found");
             response = new StateResponse(new RegisterState(this.db), new MessageResponse(EXPLAINATION_MESSAGE));

@@ -59,7 +59,7 @@ var WelcomeState = /** @class */ (function () {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.db.getUser(user_id).then(function (user) {
                             console.log("User: " + user);
-                            response = new state_response_1.StateResponse(_this, new message_response_1.MessageResponse("\u05E9\u05DC\u05D5\u05DD ".concat(user.name)));
+                            response = new state_response_1.StateResponse(_this, new message_response_1.MessageResponse("\u05D4\u05D9\u05D9 ".concat(user.name, " :)\n").concat(register_1.MORE_INFO)));
                         })["catch"](function () {
                             console.log("User not found");
                             response = new state_response_1.StateResponse(new register_1.RegisterState(_this.db), new message_response_1.MessageResponse(EXPLAINATION_MESSAGE));

@@ -22,10 +22,13 @@ var FLOOR_REQUEST = `?באיזה קומה את.ה
 (ס) - סמך
 (ט) - טופז`
 
-var INVALID_FLOOD = `סורי, לא הבנתי באיזה קומה את.ה :(\n` + FLOOR_REQUEST;
+var INVALID_FLOOR = `סורי, לא הבנתי באיזה קומה את.ה :(\n` + FLOOR_REQUEST;
 
-var THANKS_FOR_REGISTERING = `תודה על ההרשמה!\n
-השירות עדיין לא פעיל אבל עובדים על זה קשה ונשלח הודעה ברגע שהכל יהיה מוכן!`
+var THANKS_FOR_REGISTERING = `תודה על ההרשמה!`
+
+export var MORE_INFO = `השירות עדיין לא פעיל אבל עובדים על זה קשה ונשלח הודעה ברגע שהכל יהיה מוכן!\n
+לעוד מידע ושאלות מוזמנים לכתוב לקורן - https://wa.me/972544917728`
+
 export class RegisterState implements State {
     state_id = StateId.Register;
     supported_messages = [];
@@ -54,13 +57,30 @@ export class RegisterState implements State {
             return new StateResponse(this, new MessageResponse(FLOOR_REQUEST));
 
         case RegisterStage.WaitingForFloor:
-            this.floor = parseInt(message.body);
-            if (isNaN(this.floor) || this.floor > 6) {
-                return new StateResponse(this, new MessageResponse(INVALID_FLOOD));
+            var floor: any = parseInt(message.body);
+            if (isNaN(floor)) {
+                console.log(message.body);
+                switch (message.body) {
+                case "ג":
+                    floor = 'g';
+                    break;
+                case "ס":
+                    floor = 's';
+                    break;
+                case "ט":
+                    floor = 't';
+                    break;
+                default:
+                    return new StateResponse(this, new MessageResponse(INVALID_FLOOR));
+                }
             }
-            
-            this.db.createUser(new User(user_id, this.name, 2, this.floor));
-            return new StateResponse(new WelcomeState(this.db), new MessageResponse(THANKS_FOR_REGISTERING));
+            else {
+                if (floor < 1 || floor > 6) {
+                    return new StateResponse(this, new MessageResponse(INVALID_FLOOR));
+                }
+            }
+            this.db.createUser(new User(user_id, this.name, 2, floor));
+            return new StateResponse(new WelcomeState(this.db), new MessageResponse(THANKS_FOR_REGISTERING + "\n" + MORE_INFO));
         }
     }
 }
