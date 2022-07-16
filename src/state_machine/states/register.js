@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.RegisterState = void 0;
+exports.RegisterState = exports.MORE_INFO = void 0;
 var state_ids_1 = require("./state_ids");
 var message_response_1 = require("../message_response");
 var user_1 = require("../../models/user");
@@ -50,8 +50,9 @@ var RegisterStage;
 })(RegisterStage || (RegisterStage = {}));
 var NAME_REQUEST = "\u05D0\u05D6 \u05D1\u05D5\u05D0\u05D5 \u05E0\u05EA\u05D7\u05D9\u05DC, \u05E8\u05E7 2 \u05E4\u05E8\u05D8\u05D9\u05DD \u05E7\u05D8\u05E0\u05D9\u05DD!\n\u05D0\u05D9\u05DA \u05E7\u05D5\u05E8\u05D0\u05D9\u05DD \u05DC\u05DA?";
 var FLOOR_REQUEST = "?\u05D1\u05D0\u05D9\u05D6\u05D4 \u05E7\u05D5\u05DE\u05D4 \u05D0\u05EA.\u05D4\n(1 - 6)\n(\u05D2) - \u05D2\u05E0\u05E1\u05D9\u05E1\n(\u05E1) - \u05E1\u05DE\u05DA\n(\u05D8) - \u05D8\u05D5\u05E4\u05D6";
-var INVALID_FLOOD = "\u05E1\u05D5\u05E8\u05D9, \u05DC\u05D0 \u05D4\u05D1\u05E0\u05EA\u05D9 \u05D1\u05D0\u05D9\u05D6\u05D4 \u05E7\u05D5\u05DE\u05D4 \u05D0\u05EA.\u05D4 :(\n" + FLOOR_REQUEST;
-var THANKS_FOR_REGISTERING = "\u05EA\u05D5\u05D3\u05D4 \u05E2\u05DC \u05D4\u05D4\u05E8\u05E9\u05DE\u05D4!\n\n\u05D4\u05E9\u05D9\u05E8\u05D5\u05EA \u05E2\u05D3\u05D9\u05D9\u05DF \u05DC\u05D0 \u05E4\u05E2\u05D9\u05DC \u05D0\u05D1\u05DC \u05E2\u05D5\u05D1\u05D3\u05D9\u05DD \u05E2\u05DC \u05D6\u05D4 \u05E7\u05E9\u05D4 \u05D5\u05E0\u05E9\u05DC\u05D7 \u05D4\u05D5\u05D3\u05E2\u05D4 \u05D1\u05E8\u05D2\u05E2 \u05E9\u05D4\u05DB\u05DC \u05D9\u05D4\u05D9\u05D4 \u05DE\u05D5\u05DB\u05DF!";
+var INVALID_FLOOR = "\u05E1\u05D5\u05E8\u05D9, \u05DC\u05D0 \u05D4\u05D1\u05E0\u05EA\u05D9 \u05D1\u05D0\u05D9\u05D6\u05D4 \u05E7\u05D5\u05DE\u05D4 \u05D0\u05EA.\u05D4 :(\n" + FLOOR_REQUEST;
+var THANKS_FOR_REGISTERING = "\u05EA\u05D5\u05D3\u05D4 \u05E2\u05DC \u05D4\u05D4\u05E8\u05E9\u05DE\u05D4!";
+exports.MORE_INFO = "\u05D4\u05E9\u05D9\u05E8\u05D5\u05EA \u05E2\u05D3\u05D9\u05D9\u05DF \u05DC\u05D0 \u05E4\u05E2\u05D9\u05DC \u05D0\u05D1\u05DC \u05E2\u05D5\u05D1\u05D3\u05D9\u05DD \u05E2\u05DC \u05D6\u05D4 \u05E7\u05E9\u05D4 \u05D5\u05E0\u05E9\u05DC\u05D7 \u05D4\u05D5\u05D3\u05E2\u05D4 \u05D1\u05E8\u05D2\u05E2 \u05E9\u05D4\u05DB\u05DC \u05D9\u05D4\u05D9\u05D4 \u05DE\u05D5\u05DB\u05DF!\n\n\u05DC\u05E2\u05D5\u05D3 \u05DE\u05D9\u05D3\u05E2 \u05D5\u05E9\u05D0\u05DC\u05D5\u05EA \u05DE\u05D5\u05D6\u05DE\u05E0\u05D9\u05DD \u05DC\u05DB\u05EA\u05D5\u05D1 \u05DC\u05E7\u05D5\u05E8\u05DF - https://wa.me/972544917728";
 var RegisterState = /** @class */ (function () {
     function RegisterState(db) {
         this.state_id = state_ids_1.StateId.Register;
@@ -65,6 +66,7 @@ var RegisterState = /** @class */ (function () {
     };
     RegisterState.prototype.handle = function (message, user_id) {
         return __awaiter(this, void 0, void 0, function () {
+            var floor;
             return __generator(this, function (_a) {
                 switch (this.stage) {
                     case RegisterStage.WaitingForName:
@@ -73,12 +75,30 @@ var RegisterState = /** @class */ (function () {
                         this.stage = RegisterStage.WaitingForFloor;
                         return [2 /*return*/, new state_response_1.StateResponse(this, new message_response_1.MessageResponse(FLOOR_REQUEST))];
                     case RegisterStage.WaitingForFloor:
-                        this.floor = parseInt(message.body);
-                        if (isNaN(this.floor) || this.floor > 6) {
-                            return [2 /*return*/, new state_response_1.StateResponse(this, new message_response_1.MessageResponse(INVALID_FLOOD))];
+                        floor = parseInt(message.body);
+                        if (isNaN(floor)) {
+                            switch (message.body) {
+                                case "ג":
+                                    floor = 'g';
+                                    break;
+                                case "ס":
+                                    floor = 's';
+                                    break;
+                                case "ט":
+                                    floor = 't';
+                                    break;
+                                default:
+                                    return [2 /*return*/, new state_response_1.StateResponse(this, new message_response_1.MessageResponse(INVALID_FLOOR))];
+                            }
                         }
-                        this.db.createUser(new user_1.User(user_id, this.name, 2, this.floor));
-                        return [2 /*return*/, new state_response_1.StateResponse(new welcome_1.WelcomeState(this.db), new message_response_1.MessageResponse(THANKS_FOR_REGISTERING))];
+                        else {
+                            if (floor < 1 || floor > 6) {
+                                return [2 /*return*/, new state_response_1.StateResponse(this, new message_response_1.MessageResponse(INVALID_FLOOR))];
+                            }
+                        }
+                        this.db.createUser(new user_1.User(user_id, this.name, 2, floor));
+                        console.log("User ".concat(user_id, " registered with name ").concat(this.name, " and floor ").concat(floor));
+                        return [2 /*return*/, new state_response_1.StateResponse(new welcome_1.WelcomeState(this.db), new message_response_1.MessageResponse(THANKS_FOR_REGISTERING + "\n" + exports.MORE_INFO))];
                 }
                 return [2 /*return*/];
             });

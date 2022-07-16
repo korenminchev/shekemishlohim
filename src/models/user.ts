@@ -3,14 +3,14 @@ export class User {
     phone_number: string;
     name: string;
     token_count: number;
-    floor: number;
+    floor: number | string;
     office_number?: string;
 
     constructor(
         phone_number: string,
         name: string,
         token_count: number,
-        floor: number,
+        floor: number | string,
         office_number?: string,
     ) {
         this.phone_number = phone_number;
@@ -19,5 +19,4 @@ export class User {
         this.floor = floor;
         this.office_number = office_number;
     }
-
 }

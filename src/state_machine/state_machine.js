@@ -40,8 +40,12 @@ exports.StateMachine = void 0;
 var welcome_1 = require("./states/welcome");
 var StateMachine = /** @class */ (function () {
     function StateMachine(chat, db) {
+        var _this = this;
         this.chat = chat;
         this.db = db;
+        this.chat.getContact().then(function (contact) {
+            _this.phone_number = contact.number;
+        });
         this.state = new welcome_1.WelcomeState(db);
     }
     StateMachine.prototype.handleMessage = function (message) {
@@ -49,12 +53,9 @@ var StateMachine = /** @class */ (function () {
             var state_result, response;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        console.log("Handling message: " + message.body);
-                        return [4 /*yield*/, this.state.handle(message, this.chat.id._serialized)];
+                    case 0: return [4 /*yield*/, this.state.handle(message, this.phone_number)];
                     case 1:
                         state_result = _a.sent();
-                        console.log("State result: " + state_result);
                         this.respond(state_result.response);
                         if (state_result.next_state == this.state) {
                             return [2 /*return*/];
