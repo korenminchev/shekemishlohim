@@ -77,7 +77,7 @@ var RegisterState = /** @class */ (function () {
                         if (isNaN(this.floor) || this.floor > 6) {
                             return [2 /*return*/, new state_response_1.StateResponse(this, new message_response_1.MessageResponse(INVALID_FLOOD))];
                         }
-                        this.db.updateUser(new user_1.User(user_id, this.name, 2, this.floor));
+                        this.db.createUser(new user_1.User(user_id, this.name, 2, this.floor));
                         return [2 /*return*/, new state_response_1.StateResponse(new welcome_1.WelcomeState(this.db), new message_response_1.MessageResponse(THANKS_FOR_REGISTERING))];
                 }
                 return [2 /*return*/];

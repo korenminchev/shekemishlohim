@@ -59,7 +59,7 @@ export class RegisterState implements State {
                 return new StateResponse(this, new MessageResponse(INVALID_FLOOD));
             }
             
-            this.db.updateUser(new User(user_id, this.name, 2, this.floor));
+            this.db.createUser(new User(user_id, this.name, 2, this.floor));
             return new StateResponse(new WelcomeState(this.db), new MessageResponse(THANKS_FOR_REGISTERING));
         }
     }

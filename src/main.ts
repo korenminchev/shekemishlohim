@@ -2,7 +2,6 @@
 import { qrcode } from 'qrcode-terminal';
 import { ClientManager } from './client_manager';
 import { Client, LocalAuth, Chat, Message} from 'whatsapp-web.js'
-import { JsonDB } from './db/json/json_db';
 import { MongoDB } from './db/mongo/mongo_db';
 
 async function main(){
