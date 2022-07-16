@@ -2,17 +2,17 @@
 import { qrcode } from 'qrcode-terminal';
 import { ClientManager } from './client_manager';
 import { Client, LocalAuth, Chat, Message} from 'whatsapp-web.js'
-import { JsonDB } from './db/json/json_db';
+import { MongoDB } from './db/mongo/mongo_db';
 
-function main() {
+async function main(){
     console.log("Shekemishlohim Bot!");
     const client = new Client({
         authStrategy: new LocalAuth()
     });
     
-    var client_manager = new ClientManager();
-
-    JsonDB.createInstance('shekem_db.json');
+    var mongoDb = new MongoDB();
+    await mongoDb.init(); 
+    var client_manager = new ClientManager(mongoDb);
 
     client.on('qr', (qr: any) => {
         qrcode.generate(qr, {small: true});
@@ -24,7 +24,11 @@ function main() {
     
     client.on('message', (message: Message) => {
         message.getChat().then((chat: Chat) => {
-            client_manager.handleClient(chat, message);
+            try {
+                client_manager.handleClient(chat, message);
+            } catch (error) {
+                console.log(error);
+            }
         })
     });
     

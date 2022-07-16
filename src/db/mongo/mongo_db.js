@@ -36,72 +36,75 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.RecordNotFound = exports.JsonDB = void 0;
-var db_1 = require("../db");
-exports.RecordNotFound = db_1.RecordNotFound;
-var fs = require("fs");
-var JsonDB = /** @class */ (function () {
-    function JsonDB(json_path) {
-        JsonDB.db = {};
-        JsonDB.json_path = json_path;
+exports.MongoDB = void 0;
+var user_1 = require("../../models/user");
+var mongoDB = require("mongodb");
+var MongoDB = /** @class */ (function () {
+    function MongoDB() {
     }
-    JsonDB.createInstance = function (json_path) {
+    MongoDB.prototype.init = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var json_data;
+            var client;
             return __generator(this, function (_a) {
-                if (JsonDB.instance) {
-                    return [2 /*return*/];
+                switch (_a.label) {
+                    case 0:
+                        client = new mongoDB.MongoClient("mongodb://localhost:27017");
+                        return [4 /*yield*/, client.connect()];
+                    case 1:
+                        _a.sent();
+                        this.db = client.db("shekemishlohim");
+                        return [2 /*return*/];
                 }
-                JsonDB.instance = new JsonDB(json_path);
-                if (!fs.existsSync(JsonDB.json_path)) {
-                    fs.writeFileSync(JsonDB.json_path, JSON.stringify({}, null, 2));
-                    JsonDB.db = {};
-                    return [2 /*return*/];
+            });
+        });
+    };
+    MongoDB.prototype.getUser = function (phone_number) {
+        return __awaiter(this, void 0, void 0, function () {
+            var doc;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.db.collection("users").findOne({ phone_number: phone_number })];
+                    case 1:
+                        doc = _a.sent();
+                        return [2 /*return*/, new user_1.User(doc.phone_number, doc.name, doc.token_count, doc.floor, doc.office_number)];
                 }
-                json_data = fs.readFileSync(JsonDB.json_path, 'utf-8');
-                JsonDB.db = JSON.parse(json_data);
-                return [2 /*return*/];
             });
         });
     };
-    JsonDB.getInstance = function () {
-        return JsonDB.instance;
-    };
-    // No need to read json everytime because data is cached on write
-    JsonDB.prototype.getUser = function (phone_number) {
+    MongoDB.prototype.updateUser = function (user) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                return [2 /*return*/, new Promise(function (resolve, reject) {
-                        if (JsonDB.db[phone_number]) {
-                            resolve(JsonDB.db[phone_number]);
-                        }
-                        else {
-                            reject(new db_1.RecordNotFound());
-                        }
-                    })];
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.db.collection("users").updateOne({ phone_number: user.phone_number }, {
+                            $set: {
+                                name: user.name,
+                                token_count: user.token_count,
+                                floor: user.floor,
+                                office_number: user.office_number
+                            }, options: { upsert: true }
+                        })];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/, user];
+                }
             });
         });
     };
-    JsonDB.prototype.updateUser = function (user) {
+    MongoDB.prototype.createUser = function (user) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                return [2 /*return*/, new Promise(function (resolve) {
-                        JsonDB.db[user.phone_number] = user;
-                        fs.writeFileSync(JsonDB.json_path, JSON.stringify(JsonDB.db, null, 2));
-                        resolve(user);
-                    })];
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.db.collection("users").insertOne(user)];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/, user];
+                }
             });
         });
     };
-    JsonDB.prototype.recordCount = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                return [2 /*return*/, new Promise(function (resolve) {
-                        resolve(Object.keys(JsonDB.db).length);
-                    })];
-            });
-        });
+    MongoDB.prototype.userCount = function () {
+        return this.db.collection("users").countDocuments();
     };
-    return JsonDB;
+    return MongoDB;
 }());
-exports.JsonDB = JsonDB;
+exports.MongoDB = MongoDB;

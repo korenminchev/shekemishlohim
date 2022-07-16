@@ -1,4 +1,5 @@
 export class User {
+    
     phone_number: string;
     name: string;
     token_count: number;

@@ -5,9 +5,10 @@ var state_machine_1 = require("./state_machine/state_machine");
 var MILLISECONDS_IN_SECOND = 1000;
 var MILLISECONDS_IN_MINUTE = 60 * MILLISECONDS_IN_SECOND;
 var ClientManager = /** @class */ (function () {
-    function ClientManager() {
+    function ClientManager(db) {
         this.clientMapping = {};
         this.clientTimeouts = {};
+        this.db = db;
     }
     ClientManager.prototype.handleClient = function (chat, lastClientMessage) {
         var _this = this;
@@ -22,7 +23,7 @@ var ClientManager = /** @class */ (function () {
                 setTimeout(function () { return delete _this.clientMapping[chat.id._serialized]; }, 10 * MILLISECONDS_IN_MINUTE);
         }
         if (!this.clientMapping[chat.id._serialized]) {
-            this.clientMapping[chat.id._serialized] = new state_machine_1.StateMachine(chat);
+            this.clientMapping[chat.id._serialized] = new state_machine_1.StateMachine(chat, this.db);
         }
         this.clientMapping[chat.id._serialized].handleMessage(lastClientMessage);
     };
