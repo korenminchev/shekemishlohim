@@ -1,3 +1,3 @@
 run:
-	npx tsc src/main.ts --allowJS
+	npx tsc
 	node src/main.js
