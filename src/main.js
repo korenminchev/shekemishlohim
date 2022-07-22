@@ -49,7 +49,8 @@ function main() {
                 case 0:
                     console.log("Shekemishlohim Bot!");
                     client = new whatsapp_web_js_1.Client({
-                        authStrategy: new whatsapp_web_js_1.LocalAuth()
+                        authStrategy: new whatsapp_web_js_1.LocalAuth(),
+                        puppeteer: { args: ["--no-sandbox", "--disable-setuid-sandbox"] }
                     });
                     mongoDb = new mongo_db_1.MongoDB();
                     return [4 /*yield*/, mongoDb.init()];
