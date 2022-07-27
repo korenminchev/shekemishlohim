@@ -29,6 +29,7 @@ export class WelcomeState implements State {
         await this.db.getUser(user_id).then(user => {
             response = new StateResponse(this, new MessageResponse(`היי ${user.name} :)\n${MORE_INFO}`));
         }).catch(() => {
+            this.db.increaseUniqueMessagesCount();
             response = new StateResponse(new RegisterState(this.db), new MessageResponse(EXPLAINATION_MESSAGE));
         });
         return response;

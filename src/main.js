@@ -36,29 +36,34 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-// const qrcode = require('qrcode-terminal');
-var qrcode_terminal_1 = require("qrcode-terminal");
+var qrcode = require('qrcode-terminal');
 var client_manager_1 = require("./client_manager");
 var whatsapp_web_js_1 = require("whatsapp-web.js");
 var mongo_db_1 = require("./db/mongo/mongo_db");
 function main() {
     return __awaiter(this, void 0, void 0, function () {
-        var client, mongoDb, client_manager;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
+        var client, mongoDb, _a, _b, _c, client_manager;
+        return __generator(this, function (_d) {
+            switch (_d.label) {
                 case 0:
                     console.log("Shekemishlohim Bot!");
                     client = new whatsapp_web_js_1.Client({
-                        authStrategy: new whatsapp_web_js_1.LocalAuth(),
-                        puppeteer: { args: ["--no-sandbox", "--disable-setuid-sandbox"] }
+                        authStrategy: new whatsapp_web_js_1.LocalAuth()
                     });
+                    console.log("Client created");
                     mongoDb = new mongo_db_1.MongoDB();
                     return [4 /*yield*/, mongoDb.init()];
                 case 1:
-                    _a.sent();
+                    _d.sent();
+                    _b = (_a = console).log;
+                    _c = "MongoDB initialized with ".concat;
+                    return [4 /*yield*/, mongoDb.userCount()];
+                case 2:
+                    _b.apply(_a, [_c.apply("MongoDB initialized with ", [_d.sent(), " users"])]);
                     client_manager = new client_manager_1.ClientManager(mongoDb);
                     client.on('qr', function (qr) {
-                        qrcode_terminal_1.qrcode.generate(qr, { small: true });
+                        console.log("QR code: " + qr);
+                        qrcode.generate(qr, { small: true });
                     });
                     client.on('ready', function () {
                         console.log('Client is ready!');

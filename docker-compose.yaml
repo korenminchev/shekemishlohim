@@ -1,0 +1,9 @@
+version: "3.9"
+services:
+  wa-web:
+    image: koren/shekem:1.0
+    security_opt:
+      - seccomp:chrome_secomp.json
+    volumes:
+      - ./wwebjs_auth:/app/wwebjs_auth
+    command: make run
