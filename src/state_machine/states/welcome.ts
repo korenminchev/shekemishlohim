@@ -25,11 +25,13 @@ export class WelcomeState implements State {
     }
 
     async handle(message: Message, user_id: string): Promise<StateResponse> {
+        console.log(`Handling message in Welcome state: ${user_id} - ${message.body}`);
         var response;
         await this.db.getUser(user_id).then(user => {
             response = new StateResponse(this, new MessageResponse(`היי ${user.name} :)\n${MORE_INFO}`));
         }).catch(() => {
             this.db.increaseUniqueMessagesCount();
+            console.log("Sending explanation message");
             response = new StateResponse(new RegisterState(this.db), new MessageResponse(EXPLAINATION_MESSAGE));
         });
         return response;

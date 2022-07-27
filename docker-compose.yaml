@@ -1,7 +1,11 @@
 version: "3.9"
 services:
+  mongodb:
+    image: mongo:5.0
+    volumes:
+      - ~/Projects/mongodb:/data/db
   wa-web:
-    image: koren/shekem:1.0
+    image: korenminchev/korenm:1.1
     security_opt:
       - seccomp:chrome_secomp.json
     volumes:

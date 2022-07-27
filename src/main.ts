@@ -26,6 +26,10 @@ async function main() {
     });
 
     client.on('message', (message: Message) => {
+        if (message.body.length === 0) {
+            console.log("Empty message");
+            return;
+        }
         message.getChat().then((chat: Chat) => {
             try {
                 client_manager.handleClient(chat, message);
