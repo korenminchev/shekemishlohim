@@ -44,18 +44,21 @@ export class RegisterState implements State {
     }
 
     onEnter() : MessageResponse {
+        console.log("Entering Register state");
         this.stage = RegisterStage.WaitingForName;
         return {sender_response: NAME_REQUEST};
     }
 
     async handle(message: Message, user_id: string) : Promise<StateResponse> {
+        console.log(`Handling message in Register state(${this.stage}): ${user_id} - ${message.body}`);
         switch (this.stage) {
         case RegisterStage.WaitingForName:
             this.phone_number = user_id;
             this.name = message.body;
             this.stage = RegisterStage.WaitingForFloor;
+            console.log("Handled name");
             return new StateResponse(this, new MessageResponse(FLOOR_REQUEST));
-
+            
         case RegisterStage.WaitingForFloor:
             var floor: any = parseInt(message.body);
             if (isNaN(floor)) {
@@ -70,11 +73,13 @@ export class RegisterState implements State {
                     floor = 't';
                     break;
                 default:
+                    console.log(`Invalid floor`);
                     return new StateResponse(this, new MessageResponse(INVALID_FLOOR));
                 }
             }
             else {
                 if (floor < 1 || floor > 6) {
+                    console.log(`Invalid floor`);
                     return new StateResponse(this, new MessageResponse(INVALID_FLOOR));
                 }
             }

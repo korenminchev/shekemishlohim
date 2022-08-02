@@ -5,6 +5,7 @@ export interface DB {
     createUser(user: User): Promise<User>;
     updateUser(user: User): Promise<User>;
     userCount(): Promise<number>;
+    increaseUniqueMessagesCount() : Promise<void>;
 }
 
 export class RecordNotFound extends Error {

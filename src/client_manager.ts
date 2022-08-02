@@ -14,7 +14,7 @@ export class ClientManager {
         this.db = db;
     }
 
-    handleClient(chat: Chat, lastClientMessage: Message) {
+    async handleClient(chat: Chat, lastClientMessage: Message) {
         // Disabling chat reset for now
         if (false) {
             // Remove the current timeout if it exists
@@ -28,6 +28,7 @@ export class ClientManager {
 
         if (!this.clientMapping[chat.id._serialized]) {
             this.clientMapping[chat.id._serialized] = new StateMachine(chat, this.db);
+            await new Promise( resolve => setTimeout(resolve, 500));
         }
 
         this.clientMapping[chat.id._serialized].handleMessage(lastClientMessage);

@@ -1,6 +1,9 @@
 {
     "compilerOptions": {
         "allowSyntheticDefaultImports": true,
-        "esModuleInterop": true
+        "esModuleInterop": true,
+        "allowJs": true
       },
+    "include": ["src/**/*"],
+    "exclude": ["node_modules", "**/*.spec.ts"]
 }
