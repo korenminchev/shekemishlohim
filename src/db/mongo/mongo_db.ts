@@ -13,9 +13,7 @@ export class MongoDB implements DB {
     }
 
     async getUser(phone_number: string): Promise<User> {
-        console.log("getting user" + phone_number);
         const doc = await this.db.collection("users").findOne({ phone_number: phone_number });
-        console.log("got user" + phone_number + doc);
         return new User(doc.phone_number, doc.name, doc.token_count, doc.floor, doc.office_number);
     }
 
