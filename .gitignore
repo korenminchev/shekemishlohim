@@ -106,3 +106,4 @@ dist
 .wwebjs_auth/
 db_tests.json
 mongodb/
+db_backup/
