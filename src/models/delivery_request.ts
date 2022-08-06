@@ -12,7 +12,11 @@ export enum Expiration {
 }
 
 export class DeliveryRequest {
-    recipient_id: string;
+    constructor(recepient_id: number) {
+        this.receiver_id = recepient_id;
+    }
+
+    receiver_id: number;
     destination: Destination;
     expiration: Expiration;
     content: string;

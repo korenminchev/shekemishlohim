@@ -40,7 +40,7 @@ export class WelcomeState implements State {
 
                 case "משלוח":
                 case "מ":
-                    response = new StateResponse(new OrderDeliveryState(this.db), new MessageResponse(null));
+                    response = new StateResponse(new OrderDeliveryState(this.db, user_id), new MessageResponse(null));
                     break;
 
                 case "עזרה":
