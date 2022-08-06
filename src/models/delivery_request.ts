@@ -1,3 +1,5 @@
+import { isNumericLiteral } from "typescript";
+
 export enum Destination {
     building = 'building',
     segel = 'segel',
@@ -9,6 +11,26 @@ export enum Expiration {
     day = 'day',
     week = 'week',
     month = 'month'
+}
+
+export function floorToDestination(floor: any): Destination {
+    if (parseInt(floor) == floor) {
+        return Destination.building;
+    }
+
+    switch (floor) {
+        case "s":
+            return Destination.samech;
+        
+        case "t":
+            return Destination.topaz;
+
+        case "g":
+            return Destination.topaz;
+
+        case "b":
+            return Destination.segel;
+    }
 }
 
 export class DeliveryRequest {
