@@ -32,7 +32,7 @@ async function main() {
     });
 
     client.on('message', (message: Message) => {
-        if (message.body.length === 0) {
+        if (message.body.length === 0 && !message.hasMedia) {
             console.log("Empty message");
             return;
         }

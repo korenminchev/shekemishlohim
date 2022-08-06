@@ -14,7 +14,7 @@ export class MongoDB implements DB {
 
     async getUser(phone_number: string): Promise<User> {
         const doc = await this.db.collection("users").findOne({ phone_number: phone_number });
-        return new User(doc.phone_number, doc.name, doc.token_count, doc.floor, doc.office_number);
+        return new User(doc.phone_number, doc.name, doc.token_count, doc.floor, doc.office_number, doc.delivery_id);
     }
 
     async updateUser(user: User): Promise<User> {
@@ -25,7 +25,8 @@ export class MongoDB implements DB {
                 name: user.name,
                 token_count: user.token_count,
                 floor: user.floor,
-                office_number: user.office_number
+                office_number: user.office_number,
+                delivery_id: user.delivery_id
             }
         });
         return user;

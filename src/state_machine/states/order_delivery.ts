@@ -12,9 +12,6 @@ import { WelcomeState } from "./welcome";
 enum OrderDeliveryStage {
     Duration,
     Contents,
-    WaitingForPickup,
-    PickedUp,
-    Delivered
 }
 
 const userInputs = {
@@ -31,19 +28,11 @@ deliveryTime: `לכמה זמן הבקשה שלך תהיה רלוונטית?⏳
 *חודש*`,
 
 contents: `מה באלך מהשקם?🛍️`,
-orderSuccess: `ההזמנה נשלחה בהצלחה✅`,
-orderWaitingForDelivery: `ההזמנה שלך מחכה שמישהו יקח אותה מהשקם🛵
-לביטול ההזמנה - *ביטול*`,
+orderSuccess: `ההזמנה נשלחה בהצלחה✅
+ניתן לשלוח *סטטוס* בשביל לבדוק את מצב ההזמנה📋`,
 
-orderFailure: `סורי, היית שגיאה בקבלת ההזמנה שלך🤕`,
-orderCancelled: `ההזמנה בוטלה בהצלחה👍
-אשמח לפירוט אם לא היית מרוצה ממשהו📝 - ניתן להשאיר פידבק אחרי שליחת *פידבק*`,
-
-orderCancelledFailure: `סורי, היית שגיאה בביטול ההזמנה שלך🤕
-כבר בודק את זה💪`,
-
-thanksAndSorry: `תודה שהזמנת דרך ג׳סטה🙇
-מקווה שבפעם הבאה לא יהיה צורך לבטל את ההזמנה שלך🙏`,
+orderFailure: `סורי, היית שגיאה בקבלת ההזמנה שלך🤕
+אני בודק את זה🔍, בינתיים אפשר לנסות שוב`,
 }
 
 export class OrderDeliveryState implements State {
@@ -102,35 +91,15 @@ export class OrderDeliveryState implements State {
                 return Backend.createDelivery(this.delivery_request).then((deliveryId: number) => {
                     if (deliveryId != -1) {
                         this.deliveryId = deliveryId
-                        this.order_stage = OrderDeliveryStage.WaitingForPickup;
                         this.user.token_count -= 1;
+                        this.user.delivery_id = deliveryId;
                         this.db.updateUser(this.user);
-                        return new StateResponse(this, new MessageResponse(botMessages.orderSuccess));
+                        return new StateResponse(new WelcomeState(this.db), new MessageResponse(botMessages.orderSuccess));
                     }
-                    return new StateResponse(this, new MessageResponse(botMessages.orderFailure));
+                    return new StateResponse(new WelcomeState(this.db), new MessageResponse(botMessages.orderFailure));
                 }).catch(error => {
-                    return new StateResponse(this, new MessageResponse(botMessages.orderFailure));
+                    return new StateResponse(new WelcomeState(this.db), new MessageResponse(botMessages.orderFailure));
                 });
-
-
-            case OrderDeliveryStage.WaitingForPickup:
-                if (message.body == userInputs.Cancel) {
-                    return Backend.closeDelivery(this.deliveryId).then((success: boolean) => {
-                        if (success) {
-                            this.user.token_count += 1;
-                            this.db.updateUser(this.user);
-                            return new StateResponse(new WelcomeState(this.db), new MessageResponse(botMessages.orderCancelled));
-                        }
-                        else {
-                            return new StateResponse(this, new MessageResponse(botMessages.orderCancelledFailure));
-                        }
-                    });
-                }
-
-                return new StateResponse(this, new MessageResponse(botMessages.orderWaitingForDelivery));
-
-            case OrderDeliveryStage.Delivered:
-                break;
 
             default:
                 break;

@@ -22,7 +22,7 @@ export class StateMachine {
 
     async handleMessage(message: Message): Promise<void> {
         var state_result = await this.state.handle(message, this.phone_number);
-        this.respond(state_result.response);
+        await this.respond(state_result.response);
 
         if (state_result.next_state == this.state) {
             return;
@@ -41,14 +41,15 @@ export class StateMachine {
         this.state = state_result.next_state;        
     }
 
-    respond(response: MessageResponse) {
+    async respond(response: MessageResponse) {
         if (response.sender_response != null) {
             this.chat.sendMessage(response.sender_response);
         }
         if (!response.additional_receivers) {
             return;
         }
+        console.log(response.additional_receivers);
 
-        response.additional_receivers.forEach(receiver => ChatFinder.findChat(receiver.chat).then((chat) => chat.sendMessage(receiver.response)));
+        response.additional_receivers.forEach(async receiver => await ChatFinder.findChat(receiver.chat).then(async (chat) => await chat.sendMessage(receiver.response)));
     }
 }

@@ -20,7 +20,7 @@ const botMessages = {
 תודה על הג׳סטה בכל זאת🙇`,
 
     deliveryPickedUp: `תודה על הג׳סטה🙇
-רק נשאר להשאיר את השקית בעמדת משלוחים לצלם תמונה📸`,
+רק נשאר להשאיר את השקית בעמדת המשלוחים ולצלם תמונה📸`,
 
     recipientMessage: `היי! המשלוח שלך נאסף🛵🥳
 כאשר הוא יגיע תשלח אליך תמונה כדי שיהיה לך נוח לאסוף אותו!`,
