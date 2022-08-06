@@ -107,3 +107,4 @@ dist
 db_tests.json
 mongodb/
 db_backup/
+compiled/
