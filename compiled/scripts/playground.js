@@ -37,21 +37,14 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 var qrcode = require('qrcode-terminal');
-var client_manager_1 = require("./client_manager");
 var whatsapp_web_js_1 = require("whatsapp-web.js");
-var mongo_db_1 = require("./db/mongo/mongo_db");
+var mongo_db_1 = require("../src/db/mongo/mongo_db");
 function main() {
     return __awaiter(this, void 0, void 0, function () {
-        var client, mongoDb, _a, _b, _c, client_manager;
+        var mongoDb, _a, _b, _c, client;
         return __generator(this, function (_d) {
             switch (_d.label) {
                 case 0:
-                    console.log("Shekemishlohim Bot!");
-                    client = new whatsapp_web_js_1.Client({
-                        authStrategy: new whatsapp_web_js_1.LocalAuth(),
-                        puppeteer: { args: ['--no-sandbox'] }
-                    });
-                    console.log("Client created");
                     mongoDb = new mongo_db_1.MongoDB();
                     return [4 /*yield*/, mongoDb.init()];
                 case 1:
@@ -61,28 +54,27 @@ function main() {
                     return [4 /*yield*/, mongoDb.userCount()];
                 case 2:
                     _b.apply(_a, [_c.apply("MongoDB initialized with ", [_d.sent(), " users"])]);
-                    client_manager = new client_manager_1.ClientManager(mongoDb);
+                    console.log("Shekemishlohim Bot!");
+                    client = new whatsapp_web_js_1.Client({
+                        authStrategy: new whatsapp_web_js_1.LocalAuth(),
+                        puppeteer: { args: ['--no-sandbox'] }
+                    });
                     client.on('qr', function (qr) {
                         console.log("QR code: " + qr);
                         qrcode.generate(qr, { small: true });
                     });
                     client.on('ready', function () {
-                        console.log('Client is ready!');
-                    });
-                    client.on('message', function (message) {
-                        if (message.body.length === 0) {
-                            console.log("Empty message");
-                            return;
-                        }
-                        message.getChat().then(function (chat) {
-                            try {
-                                client_manager.handleClient(chat, message);
-                            }
-                            catch (error) {
-                                console.log(error);
-                            }
+                        client.getChats().then(function (chats) {
+                            chats.forEach(function (chat) {
+                                chat.getContact().then(function (contact) {
+                                    mongoDb.getUser(contact.number).then(function (user) { })["catch"](function (error) {
+                                        console.log(contact.number);
+                                    });
+                                });
+                            });
                         });
                     });
+                    client.on('message', function (message) { });
                     client.initialize();
                     return [2 /*return*/];
             }

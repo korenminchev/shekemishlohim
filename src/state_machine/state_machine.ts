@@ -35,7 +35,9 @@ export class StateMachine {
     }
 
     respond(response: MessageResponse) {
-        this.chat.sendMessage(response.sender_response);
+        if (response.sender_response != null) {
+            this.chat.sendMessage(response.sender_response);
+        }
         if (!response.additional_receivers) {
             return;
         }

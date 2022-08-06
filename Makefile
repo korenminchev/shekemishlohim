@@ -1,3 +1,3 @@
 run:
 	npx tsc
-	node src/main.js
+	node compiled/main.js
