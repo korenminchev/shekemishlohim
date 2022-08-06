@@ -21,12 +21,7 @@ async function main() {
     client.on('ready', () => {
         client.getChats().then((chats: Chat[]) => {
             chats.forEach((chat: Chat) => {
-                chat.getContact().then((contact: Contact) => {
-                    mongoDb.getUser(contact.number).then((user: any) => {}).catch((error: any) => {
-                        console.log(contact.number);
-                    });
-                    
-                });
+                console.log(chat.id._serialized);                
             });
         });
     });

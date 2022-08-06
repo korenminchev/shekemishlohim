@@ -63,9 +63,8 @@ export class OrderDeliveryState implements State {
         this.delivery_request = new DeliveryRequest(parseInt(this.user_id));
     }
 
-    onEnter(): MessageResponse {
+    async onEnter(): Promise<MessageResponse> {
         // TODO: Check if the user has enough tokens to start the order
-        // TODO: Update the destination field using the user's location
         this.delivery_request.destination = Destination.building;
         this.db.getUser(this.user_id).then((user: User) => {
             this.delivery_request.destination = floorToDestination(user.floor);

@@ -43,10 +43,10 @@ export class RegisterState implements State {
         this.stage = RegisterStage.Begin;
     }
 
-    onEnter() : MessageResponse {
+    async onEnter() : Promise<MessageResponse> {
         console.log("Entering Register state");
         this.stage = RegisterStage.WaitingForName;
-        return {sender_response: NAME_REQUEST};
+        return new MessageResponse(NAME_REQUEST);
     }
 
     async handle(message: Message, user_id: string) : Promise<StateResponse> {

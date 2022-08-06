@@ -3,6 +3,7 @@ import { ClientManager } from './client_manager';
 import { Client, LocalAuth, Chat, Message } from 'whatsapp-web.js'
 import { MongoDB } from './db/mongo/mongo_db';
 import { Backend } from './backend/backend';
+import { ChatFinder } from './bot_tools/chat_finder';
 
 async function main() {
     console.log("Shekemishlohim Bot!");
@@ -17,6 +18,7 @@ async function main() {
     console.log(`MongoDB initialized with ${await mongoDb.userCount()} users`);
 
     Backend.init("127.0.0.1", 2711);
+    ChatFinder.init(client);
 
     var client_manager = new ClientManager(mongoDb);
 

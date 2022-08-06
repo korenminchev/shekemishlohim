@@ -1,5 +1,5 @@
 import axios from "axios";
-import { DeliveryRequest } from "../models/delivery_request";
+import { DeliveryRequest, Destination } from "../models/delivery_request";
 
 export class Backend {
     static ip: String;
@@ -36,6 +36,21 @@ export class Backend {
             return true;
         } catch (error) {
             return false;
+        }
+    }
+
+    static async getDeliveries(destination: Destination): Promise<DeliveryRequest[]> {
+        try {
+            const { data, status } = await axios.get<DeliveryRequest[]>(`http://${this.ip}:${this.port}/delivery?destination=${destination}`);
+            console.log(status);
+            if (status != 200) {
+                return null;
+            }
+
+            console.log(data);
+            return data;
+        } catch (error) {
+            return null;
         }
     }
 }

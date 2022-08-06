@@ -8,7 +8,7 @@ export interface State {
     supported_messages: string[];
     db: DB;
 
-    onEnter(): MessageResponse;
+    onEnter(): Promise<MessageResponse>;
 
     handle(message: Message, user_id: string) : Promise<StateResponse>;
 }

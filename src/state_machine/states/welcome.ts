@@ -7,6 +7,8 @@ import { StateResponse } from "../state_response";
 import { DB } from "../../db/db";
 import { OrderDeliveryState } from "./order_delivery";
 import { botGenericInputError } from "../../models/bot_generic_messages";
+import { BringDeliveryState } from "./bring_delivery";
+import { destinationToHebrewString, floorToDestination } from "../../models/delivery_request";
 
 const EXPLAINATION_MESSAGE = `היי! אז מה זה שקמשלוחים?
 מכירים את זה כשאתם במשרד ובא לכם משהו מהשקם אבל אין לכם כוח לצאת ממצוב בשביל זה?
@@ -44,7 +46,7 @@ export class WelcomeState implements State {
         this.db = db;
     }
 
-    onEnter(): MessageResponse {
+    onEnter(): Promise<MessageResponse> {
         return null;
     }
 
@@ -63,7 +65,7 @@ export class WelcomeState implements State {
             switch (message.body) {
                 case "בשקם":
                 case "ש":
-                    response = new StateResponse(this, new MessageResponse("עדיין לא פיתחתי את הצד של השקם"));
+                    response = new StateResponse(new BringDeliveryState(this.db, user), new MessageResponse(`מציג בקשות ג׳סטה ל${destinationToHebrewString(floorToDestination(user.floor))}`));
                     break;
 
                 case "משלוח":

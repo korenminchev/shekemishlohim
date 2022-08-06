@@ -13,6 +13,19 @@ export enum Expiration {
     month = 'month'
 }
 
+export function destinationToHebrewString(destination: Destination): string {
+    switch (destination) {
+        case Destination.building:
+            return 'בניין';
+        case Destination.segel:
+            return 'סגל';
+        case Destination.samech:
+            return 'ס׳';
+        case Destination.topaz:
+            return 'טופז וג׳נסיס';
+    }
+}
+
 export function floorToDestination(floor: any): Destination {
     if (parseInt(floor) == floor) {
         return Destination.building;

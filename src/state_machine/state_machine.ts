@@ -1,4 +1,5 @@
 import { Chat, Message, Contact } from "whatsapp-web.js";
+import { ChatFinder } from "../bot_tools/chat_finder";
 import { DB } from "../db/db";
 import { MessageResponse } from "./message_response";
 import { State } from "./state";
@@ -27,11 +28,17 @@ export class StateMachine {
             return;
         }
 
-        this.state = state_result.next_state;
-        var response = this.state.onEnter();
+        var response = await state_result.next_state.onEnter();
         if (response != null) {
             this.respond(response);
+
+            if (response.enter_state) {
+                this.state = state_result.next_state;
+            }
+            return;
         }
+
+        this.state = state_result.next_state;        
     }
 
     respond(response: MessageResponse) {
@@ -42,6 +49,6 @@ export class StateMachine {
             return;
         }
 
-        response.additional_receivers.forEach(receiver => receiver.chat.sendMessage(receiver.response));
+        response.additional_receivers.forEach(receiver => ChatFinder.findChat(receiver.chat).then((chat) => chat.sendMessage(receiver.response)));
     }
 }
