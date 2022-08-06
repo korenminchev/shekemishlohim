@@ -48,8 +48,14 @@ export class StateMachine {
         if (!response.additional_receivers) {
             return;
         }
-        console.log(response.additional_receivers);
 
-        response.additional_receivers.forEach(async receiver => await ChatFinder.findChat(receiver.chat).then(async (chat) => await chat.sendMessage(receiver.response)));
+        for (var i = 0; i < response.additional_receivers.length; i++) {
+            var receiver = response.additional_receivers[i];
+            var chat = await ChatFinder.findChat(receiver.chat);
+            if (chat == null) {
+                continue;
+            }
+            chat.sendMessage(receiver.response);
+        }
     }
 }
