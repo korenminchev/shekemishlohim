@@ -22,7 +22,7 @@ export function destinationToHebrewString(destination: Destination): string {
         case Destination.samech:
             return 'ס׳';
         case Destination.topaz:
-            return 'טופז וג׳נסיס';
+            return 'טופז, ס׳ וג׳נסיס';
     }
 }
 
@@ -33,7 +33,7 @@ export function floorToDestination(floor: any): Destination {
 
     switch (floor) {
         case "s":
-            return Destination.samech;
+            return Destination.topaz;
         
         case "t":
             return Destination.topaz;

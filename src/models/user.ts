@@ -27,3 +27,9 @@ export class User {
         return this.delivery_id != null && this.delivery_id != -1;
     }
 }
+
+export enum UserStatus {
+    no_delivery = "no_delivery",
+    not_assigned_delivery = "not_assigned_delivery",
+    assigned_delivery = "assigned_delivery"
+}

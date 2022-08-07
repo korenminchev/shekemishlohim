@@ -10,6 +10,7 @@ import { botGenericInputError } from "../../models/bot_generic_messages";
 import { BringDeliveryState } from "./bring_delivery";
 import { destinationToHebrewString, floorToDestination } from "../../models/delivery_request";
 import { Backend } from "../../backend/backend";
+import { UserStatus } from "../../models/user";
 
 const EXPLAINATION_MESSAGE = `היי! אז מה זה שקמשלוחים?
 מכירים את זה כשאתם במשרד ובא לכם משהו מהשקם אבל אין לכם כוח לצאת ממצוב בשביל זה?
@@ -44,6 +45,11 @@ const botMessages = {
     orderCancelledFailure: `סורי, היית שגיאה בביטול ההזמנה שלך🤕
 כבר בודק את זה💪`,
 
+orderIsOnTheWay: `המשלוח בדרך מהשקם🛵`,
+
+noTokens: `סורי, אין לך כרגע טוקנים בשביל להזמין משלוח😞
+ניתן להשיג טוקנים ע״י ג׳סטה מהשקם לחבר😉`,
+
 haveAnActiveOrder: `היי, מזכיר שיש לך הזמנה פעילה שמחכה לאיסוף🛵:`,
 youCanCancelOrder: `אפשר לבטל את ההזמנה על ידי שליחת *ביטול*`,
 }
@@ -72,14 +78,13 @@ export class WelcomeState implements State {
                 response = new StateResponse(this, new MessageResponse(botMessages.feedbackAccepted));
                 return;
             }
-            console.log(user.delivery_id)
-            console.log(user.hasDelivery())
 
             switch (message.body) {
                 case "בשקם":
                 case "ש":
                     var additional_data;
-                    if (user.hasDelivery()) {
+                    var status: UserStatus = await(Backend.getUserStatus(user_id));
+                    if (status != UserStatus.no_delivery) {
                         additional_data = [{
                             chat: user_id,
                             response: botMessages.haveAnActiveOrder + botMessages.youCanCancelOrder
@@ -90,7 +95,13 @@ export class WelcomeState implements State {
 
                 case "משלוח":
                 case "מ":
-                    if (user.hasDelivery()) {
+                    if (user.token_count <= 0) {
+                        response = new StateResponse(this, new MessageResponse(botMessages.noTokens));
+                        break;
+                    }
+
+                    var status: UserStatus = await(Backend.getUserStatus(user_id));
+                    if (status != UserStatus.no_delivery) {
                         response = new StateResponse(this, new MessageResponse(botMessages.orderWaitingForDelivery));
                         break;
                     }
@@ -102,6 +113,7 @@ export class WelcomeState implements State {
                     break;
 
                 case "טוקן":
+                case "תוקן":
                     response = new StateResponse(this, new MessageResponse(`טוקנים שברשותך: ${user.token_count}🪙`));
                     break;
 
@@ -111,24 +123,33 @@ export class WelcomeState implements State {
                     break;
 
                 case "סטטוס":
-                    if (!user.hasDelivery()) {
+                    var status: UserStatus = await(Backend.getUserStatus(user_id));
+                    switch (status) {
+                        case UserStatus.no_delivery:
+                            response = new StateResponse(this, new MessageResponse(botMessages.noActiveDelivery));
+                            break;
+                            
+                        case UserStatus.not_assigned_delivery:
+                            response = new StateResponse(this, new MessageResponse(botMessages.orderWaitingForDelivery))
+                            break;
+                        
+                        case UserStatus.assigned_delivery:
+                            response = new StateResponse(this, new MessageResponse(botMessages.orderIsOnTheWay));
+                            break;
+                    }
+
+                    break;
+
+                case "ביטול":
+                    var status: UserStatus = await(Backend.getUserStatus(user_id));
+                    if (status == UserStatus.no_delivery) {
                         response = new StateResponse(this, new MessageResponse(botMessages.noActiveDelivery));
                         break;
                     }
 
-                    // TODO: get delivery status
-                    response = new StateResponse(this, new MessageResponse(botMessages.orderWaitingForDelivery))
-                    break;
-
-                case "ביטול":
-                    if (!user.hasDelivery()) {
-                        response = new StateResponse(this, new MessageResponse(botMessages.noActiveDelivery));
-                    }
-
-                    await Backend.closeDelivery(user.delivery_id).then((success: boolean) => {
+                    await Backend.closeDelivery(user.phone_number).then((success: boolean) => {
                         if (success) {
                             user.token_count += 1;
-                            user.delivery_id = null;
                             this.db.updateUser(user);
                             response = new StateResponse(new WelcomeState(this.db), new MessageResponse(botMessages.orderCancelled));
                             return;
@@ -138,6 +159,7 @@ export class WelcomeState implements State {
                             return;
                         }
                     });
+                    break;
 
                 default:
                     response = new StateResponse(this, new MessageResponse(botMessages.unrecognized));

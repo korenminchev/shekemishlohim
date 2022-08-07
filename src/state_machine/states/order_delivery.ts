@@ -88,11 +88,9 @@ export class OrderDeliveryState implements State {
 
             case OrderDeliveryStage.Contents:
                 this.delivery_request.content = message.body
-                return Backend.createDelivery(this.delivery_request).then((deliveryId: number) => {
-                    if (deliveryId != -1) {
-                        this.deliveryId = deliveryId
+                return Backend.createDelivery(this.delivery_request).then((success: boolean) => {
+                    if (success) {
                         this.user.token_count -= 1;
-                        this.user.delivery_id = deliveryId;
                         this.db.updateUser(this.user);
                         return new StateResponse(new WelcomeState(this.db), new MessageResponse(botMessages.orderSuccess));
                     }

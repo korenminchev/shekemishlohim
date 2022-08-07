@@ -72,7 +72,7 @@ export class BringDeliveryState implements State {
 
     async onEnter(): Promise<MessageResponse> {
         const destination = floorToDestination(this.user.floor);
-        return Backend.getDeliveries(destination).then((deliveries) => {
+        return Backend.getDeliveries(destination, this.user.phone_number).then((deliveries) => {
             this.deliveries = deliveries
             if (this.deliveries == null || this.deliveries.length == 0) {
                 return new MessageResponse(botMessages.noDeliveries, null, false);
@@ -82,7 +82,7 @@ export class BringDeliveryState implements State {
         });
     }
 
-    async handle(message: Message, user_id: string): Promise<StateResponse> {
+    async handle(message: Message): Promise<StateResponse> {
         switch (this.pickupState) {
             case PickupState.Choosing:
                 return this.handleChoosing(message);
@@ -96,7 +96,7 @@ export class BringDeliveryState implements State {
                 const image = await message.downloadMedia();
                 this.user.token_count++;
                 this.db.updateUser(this.user);
-                Backend.closeDelivery(parseInt(receiver.phone_number));
+                Backend.closeDelivery(receiver.phone_number);
                 return new StateResponse(new WelcomeState(this.db), new MessageResponse(botMessages.thankYou + receiver.name.split(" ")[0] + " - " + receiver.phone_number + '\n' + botMessages.payementTip, [
                     { chat: receiver.phone_number, response: image },
                     { chat: receiver.phone_number, response: botMessages.receiverArrived + this.user.name.split(" ")[0] + " - " + this.user.phone_number + "\n" + botMessages.payementTip }

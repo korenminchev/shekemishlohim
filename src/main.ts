@@ -17,7 +17,7 @@ async function main() {
     await mongoDb.init();
     console.log(`MongoDB initialized with ${await mongoDb.userCount()} users`);
 
-    Backend.init("127.0.0.1", 2711);
+    Backend.init("backend", 3000);
     ChatFinder.init(client);
 
     var client_manager = new ClientManager(mongoDb);
@@ -38,7 +38,7 @@ async function main() {
         }
         message.getChat().then((chat: Chat) => {
             try {
-                if (chat.id._serialized != "972544917728@c.us") {
+                if (chat.id._serialized != "972544917728@c.us" && chat.id._serialized != "972547707389@c.us") {
                     chat.sendMessage("היי, אני סגור לשיפוצים כרגע🔨");
                     return;
                 }
