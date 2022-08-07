@@ -7,7 +7,7 @@ export class MongoDB implements DB {
     db: mongoDB.Db;
 
     async init() {
-        const client = new mongoDB.MongoClient("mongodb://localhost:27017")
+        const client = new mongoDB.MongoClient("mongodb://mongodb:27017")
         await client.connect();
         this.db = client.db("shekemishlohim");
     }
