@@ -22,8 +22,21 @@ const botMessages = {
     deliveryPickedUp: `תודה על הג׳סטה🙇
 רק נשאר להשאיר את השקית בעמדת המשלוחים ולצלם תמונה📸`,
 
-    recipientMessage: `היי! המשלוח שלך נאסף🛵🥳
+    recipientPickedup: `היי! המשלוח שלך נאסף🛵🥳
 כאשר הוא יגיע תשלח אליך תמונה כדי שיהיה לך נוח לאסוף אותו!`,
+
+    notImage: `אני לא חושב שזאת תמונה😅
+בשביל לסיים את הג׳סטה אני צריך רק תמונה של השקית בעמדת המשלוחים📸`,
+
+    thankYou: `תודה רבה רבה על הג׳סטה!🙇
+הנה הפרטים של המזמין בשביל שתסדרו ביניכם את התשלום💰:
+`,
+
+    receiverArrived: `המשלוח שלך הגיע!🥳
+עכשיו רק נשאר לסדר את התשלום מול הג׳סטר שלך💵:
+`,
+
+    payementTip: `*טיפ:* ניתן להעביר כסף בביט גם כאשר איש הקשר לא שמור, ע״י הזנת מספר הטלפון במקום האיש קשר`,
 
     sadLeave: `חבל לי שביטלת את הג׳סטה😞
 אפשר לתת לי פידבק בשליחת *פידבק*, אשמח לשמוע📝
@@ -69,19 +82,38 @@ export class BringDeliveryState implements State {
         });
     }
 
-    async handle(nessage: Message, user_id: string): Promise<StateResponse> {
+    async handle(message: Message, user_id: string): Promise<StateResponse> {
         switch (this.pickupState) {
             case PickupState.Choosing:
-                return this.handleChoosing(nessage);
+                return this.handleChoosing(message);
 
+            case PickupState.Delivering:
+                if (!message.hasMedia) {
+                    return new StateResponse(this, new MessageResponse(botMessages.notImage));
+                }
+
+                var receiver: User = await this.db.getUser(this.deliveries[this.deliveryIndex].receiver_id.toString());
+                const image = await message.downloadMedia();
+                this.user.token_count++;
+                this.db.updateUser(this.user);
+                Backend.closeDelivery(parseInt(receiver.phone_number));
+                return new StateResponse(new WelcomeState(this.db), new MessageResponse(botMessages.thankYou + receiver.name.split(" ")[0] + " - " + receiver.phone_number + '\n' + botMessages.payementTip, [
+                    { chat: receiver.phone_number, response: image },
+                    { chat: receiver.phone_number, response: botMessages.receiverArrived + this.user.name.split(" ")[0] + " - " + this.user.phone_number + "\n" + botMessages.payementTip }
+                ]
+                ));
         }
     }
 
     async handleChoosing(nessage: Message): Promise<StateResponse> {
         switch (nessage.body) {
-            case userInputs.confirm:
+            case userInputs.confirm:    
+                var success: boolean = await Backend.acceptDelivery(this.deliveries[this.deliveryIndex].receiver_id, this.user.phone_number);
+                if (!success) {
+                    return new StateResponse(this, new MessageResponse(botMessages.sadLeave));
+                }
                 this.pickupState = PickupState.Delivering;
-                return new StateResponse(this, new MessageResponse(botMessages.deliveryPickedUp, [{ chat: this.deliveries[this.deliveryIndex].receiver_id.toString(), response: botMessages.recipientMessage }]));
+                return new StateResponse(this, new MessageResponse(botMessages.deliveryPickedUp, [{ chat: this.deliveries[this.deliveryIndex].receiver_id.toString(), response: botMessages.recipientPickedup }]));
 
             case userInputs.next:
                 this.deliveryIndex++;

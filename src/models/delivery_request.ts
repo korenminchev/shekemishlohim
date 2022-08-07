@@ -47,11 +47,11 @@ export function floorToDestination(floor: any): Destination {
 }
 
 export class DeliveryRequest {
-    constructor(recepient_id: number) {
+    constructor(recepient_id: string) {
         this.receiver_id = recepient_id;
     }
 
-    receiver_id: number;
+    receiver_id: string;
     destination: Destination;
     expiration: Expiration;
     content: string;

@@ -49,7 +49,7 @@ export class OrderDeliveryState implements State {
     constructor(db: DB, user_id: string) {
         this.db = db;
         this.user_id = user_id;
-        this.delivery_request = new DeliveryRequest(parseInt(this.user_id));
+        this.delivery_request = new DeliveryRequest(this.user_id);
     }
 
     async onEnter(): Promise<MessageResponse> {
