@@ -24,10 +24,8 @@ var FLOOR_REQUEST = `?באיזה קומה את.ה
 
 var INVALID_FLOOR = `סורי, לא מכיר את המקום הזה😞\n` + FLOOR_REQUEST;
 
-var THANKS_FOR_REGISTERING = `תודה על ההרשמה!`
-
-export var MORE_INFO = `ברוך הבא ל*ג׳סטה*🥳
-לכל הפעולות אפשר לרשום *עזרה*ℹ️`
+export var MORE_INFO = `ברוך הבא ל *ג׳סטה*🥳
+לכל הפעולות אפשר לרשום *עזרה* ℹ️`
 
 export class RegisterState implements State {
     state_id = StateId.Register;
