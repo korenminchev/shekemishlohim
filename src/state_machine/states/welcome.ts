@@ -2,7 +2,7 @@ import { State } from "../state";
 import { StateId } from "./state_ids";
 import { Message } from "whatsapp-web.js";
 import { MessageResponse } from "../message_response";
-import { MORE_INFO, RegisterState } from "./register";
+import { RegisterState } from "./register";
 import { StateResponse } from "../state_response";
 import { DB } from "../../db/db";
 import { OrderDeliveryState } from "./order_delivery";
@@ -12,27 +12,31 @@ import { destinationToHebrewString, floorToDestination } from "../../models/deli
 import { Backend } from "../../backend/backend";
 import { UserStatus } from "../../models/user";
 
-const EXPLAINATION_MESSAGE = `היי! אז מה זה שקמשלוחים?
-מכירים את זה כשאתם במשרד ובא לכם משהו מהשקם אבל אין לכם כוח לצאת ממצוב בשביל זה?
-עם שקמשלוחים אנשים שכבר נמצאים בשקם יוכלו לקחת הזמנה שלכם ולהביא אותה קרוב מספיק אליכם!
-כל זה בציפייה שכשאתם תהיו שם אז תקחו מדי פעם למישהו שקית לבניין ;)`;
-
 const UNRECOGNIZED_COMMAND = botGenericInputError + ` אפשר לשלוח לי *עזרה* בשביל לראות את כל האוציותℹ️`
 
 const botMessages = {
+
+    explenationMessage: `היי! אז מה זה *ג׳סטה*?
+מכירים את זה כשאתם במשרד ובא לכם משהו מהשקם🤤 אבל אין לכם כוח לצאת ממצוב בשביל זה?
+עם *ג׳סטה*, חברים(ג׳סטרים) שכבר נמצאים בשקם יוכלו לקחת הזמנה שלכם ולהביא אותה קרוב מספיק אליכם!
+כל זה בציפייה שכשאתם תהיו שם אז תעשו ג׳סטה מדי פעם😉`,
+
     unrecognized: botGenericInputError + `
+
 בשקם? 🐝 שלח *ש*
 באלך משלוח?🛵 שלח *מ*
 אפשר לשלוח לי *עזרה* בשביל לראות את כל האופציותℹ️`,
 
     help: `*ג׳סטה* 😉 - הבוט למשלוחים מהשקם
-בשקם?🐝 - *ש* או *בשקם* בשביל לקחת משלוח
+
+בשקם?🐝 - *ש*, *שקם* או *אני בשקם* בשביל לקחת משלוח
 יש לך דודא?🤤 - *מ* או *משלוח* בשביל להזמין משלוח
 
 *טוקן* - כמות הטוקנים שברשותך 🪙
 *פידבק* - להשארת פידבק, בעיות והצעות לשיפור השירות 📝
 *סטטוס* - בדיקת סטטוס ההזמנה שלך 📋
 *ביטול* - ביטול ההזמנה שלך 🔙
+*מידע* - מידע נוסף על הקונספט של ג׳סטה
 לעוד מידע ושאלות מוזמנים לכתוב לקורן - https://wa.me/972544917728`,
 
     feedbackAccepted: `תודה על הפידבק!🙇 רשמתי לעצמי`,
@@ -50,8 +54,19 @@ orderIsOnTheWay: `המשלוח בדרך מהשקם🛵`,
 noTokens: `סורי, אין לך כרגע טוקנים בשביל להזמין משלוח😞
 ניתן להשיג טוקנים ע״י ג׳סטה מהשקם לחבר😉`,
 
-haveAnActiveOrder: `היי, מזכיר שיש לך הזמנה פעילה שמחכה לאיסוף🛵:`,
+haveAnActiveOrder: `היי, מזכיר שיש לך הזמנה פעילה שמחכה לאיסוף🛵
+אם היא כבר לא רלוונטית תוכל לבטל אותה אחר כך😃`,
 youCanCancelOrder: `אפשר לבטל את ההזמנה על ידי שליחת *ביטול*`,
+workingOnIt: `עובדים על דברים אחרונים לפני שהכל יהיה מוכן ויהיה אפשר להזמין משלוח😄`,
+workingOnItJester: `עובדים על דברים אחרונים לפני שהכל יהיה מוכן ויהיה אפשר לעשות ג׳סטה😄`,
+info: `ברוכים הבאים *לג׳סטה*! 🥳
+מהיום אפשר להזמין משלוח בשליחת הודעת *משלוח* או את האות *מ*📦
+להזמין משלוח יעלה לך טוקן אחד🪙
+כאשר המשלוח יגיע תצטרכו להעביר לג׳סטר שלכם שלכם את הסכום של ההזמנה בדרך שנוחה לשניכם🧑🏽‍🤝‍🧑🏻
+אז איך משיגים טוקנים?💸
+עושים ג׳סטה (משלוח) כשנמצאים בשקם, בשליחת הודעה *אני בשקם*, *שקם* או את האות *ש*, מביאים אותו לנקודת מסירה ביחידה (לובי מצוב או חמ״ל טופז, תלוי במיקום שלכם) ועושים תמונה של השקית🛍️🛵
+לבדיקת הטוקנים שברשותך אפשר לרשום *טוקן*💵 הזמנות ומשלוחים נעימים✨
+`
 }
 
 export class WelcomeState implements State {
@@ -72,16 +87,23 @@ export class WelcomeState implements State {
         console.log(`Handling message in Welcome state: ${user_id} - ${message.body}`);
         var response;
         await this.db.getUser(user_id).then(async user => {
+
             if (this.waitingForFeedback) {
-                // TODO: handle feedback
+                this.db.saveFeedback(user_id, message.body.slice(0, 512));
                 this.waitingForFeedback = false;
                 response = new StateResponse(this, new MessageResponse(botMessages.feedbackAccepted));
                 return;
             }
 
             switch (message.body) {
-                case "בשקם":
+                case "שקם":
+                case "אני בשקם":
                 case "ש":
+                    if (user_id != "972547707389" && user_id != "972544917728") {
+                        response = new StateResponse(this, new MessageResponse(botMessages.workingOnItJester));
+                        break;
+                    }
+
                     var additional_data;
                     var status: UserStatus = await(Backend.getUserStatus(user_id));
                     if (status != UserStatus.no_delivery) {
@@ -95,6 +117,11 @@ export class WelcomeState implements State {
 
                 case "משלוח":
                 case "מ":
+                    if (user_id != "972547707389" && user_id != "972544917728") {
+                        response = new StateResponse(this, new MessageResponse(botMessages.workingOnIt));
+                        break;
+                    }
+
                     if (user.token_count <= 0) {
                         response = new StateResponse(this, new MessageResponse(botMessages.noTokens));
                         break;
@@ -125,6 +152,7 @@ export class WelcomeState implements State {
                 case "סטטוס":
                     var status: UserStatus = await(Backend.getUserStatus(user_id));
                     switch (status) {
+                        case null:
                         case UserStatus.no_delivery:
                             response = new StateResponse(this, new MessageResponse(botMessages.noActiveDelivery));
                             break;
@@ -142,7 +170,7 @@ export class WelcomeState implements State {
 
                 case "ביטול":
                     var status: UserStatus = await(Backend.getUserStatus(user_id));
-                    if (status == UserStatus.no_delivery) {
+                    if (status == null || status == UserStatus.no_delivery) {
                         response = new StateResponse(this, new MessageResponse(botMessages.noActiveDelivery));
                         break;
                     }
@@ -161,13 +189,16 @@ export class WelcomeState implements State {
                     });
                     break;
 
+                case "מידע":
+                    response = new StateResponse(this, new MessageResponse(botMessages.info));
+                    break;
+
                 default:
                     response = new StateResponse(this, new MessageResponse(botMessages.unrecognized));
             }
         }).catch(() => {
             this.db.increaseUniqueMessagesCount();
-            console.log("Sending explanation message");
-            response = new StateResponse(new RegisterState(this.db), new MessageResponse(EXPLAINATION_MESSAGE));
+            response = new StateResponse(new RegisterState(this.db), new MessageResponse(botMessages.explenationMessage));
         });
         return response;
     }

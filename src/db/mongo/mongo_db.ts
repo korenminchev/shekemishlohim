@@ -45,4 +45,9 @@ export class MongoDB implements DB {
         this.db.collection("data").updateOne({}, { $inc: { unique_messages_count: 1 } });
         return Promise.resolve();
     }
+
+    saveFeedback(user_id: string, feedback: string): Promise<void> {
+        this.db.collection("feedback").insertOne({user_id: user_id, feedback: feedback });
+        return Promise.resolve();
+    }
 }

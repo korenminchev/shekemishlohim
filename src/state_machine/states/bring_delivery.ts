@@ -20,7 +20,8 @@ const botMessages = {
 תודה על הג׳סטה בכל זאת🙇`,
 
     deliveryPickedUp: `תודה על הג׳סטה🙇
-רק נשאר להשאיר את השקית בעמדת המשלוחים ולצלם תמונה📸`,
+רק נשאר להשאיר את השקית בעמדת המשלוחים ולצלם תמונה📸
+*לא לשכוח לשים קבלה בשקית*😉`,
 
     recipientPickedup: `היי! המשלוח שלך נאסף🛵🥳
 כאשר הוא יגיע תשלח אליך תמונה כדי שיהיה לך נוח לאסוף אותו!`,
@@ -36,7 +37,8 @@ const botMessages = {
 עכשיו רק נשאר לסדר את התשלום מול הג׳סטר שלך💵:
 `,
 
-    payementTip: `*טיפ:* ניתן להעביר כסף בביט גם כאשר איש הקשר לא שמור, ע״י הזנת מספר הטלפון במקום האיש קשר`,
+    payementTipRecepeient: `*טיפ:* ניתן להעביר כסף בביט גם כאשר איש הקשר לא שמור, ע״י הזנת מספר הטלפון במקום האיש קשר`,
+    payementTipJester: `*טיפ:* ניתן לבקש כסף בביט גם כאשר איש הקשר לא שמור, ע״י הזנת מספר הטלפון במקום האיש קשר`,
 
     sadLeave: `חבל לי שביטלת את הג׳סטה😞
 אפשר לתת לי פידבק בשליחת *פידבק*, אשמח לשמוע📝
@@ -97,9 +99,9 @@ export class BringDeliveryState implements State {
                 this.user.token_count++;
                 this.db.updateUser(this.user);
                 Backend.closeDelivery(receiver.phone_number);
-                return new StateResponse(new WelcomeState(this.db), new MessageResponse(botMessages.thankYou + receiver.name.split(" ")[0] + " - " + receiver.phone_number + '\n' + botMessages.payementTip, [
+                return new StateResponse(new WelcomeState(this.db), new MessageResponse(botMessages.thankYou + receiver.name.split(" ")[0] + " - " + receiver.phone_number + '\n' + botMessages.payementTipJester, [
                     { chat: receiver.phone_number, response: image },
-                    { chat: receiver.phone_number, response: botMessages.receiverArrived + this.user.name.split(" ")[0] + " - " + this.user.phone_number + "\n" + botMessages.payementTip }
+                    { chat: receiver.phone_number, response: botMessages.receiverArrived + this.user.name.split(" ")[0] + " - " + this.user.phone_number + "\n" + botMessages.payementTipRecepeient }
                 ]
                 ));
         }
