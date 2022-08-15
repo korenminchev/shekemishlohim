@@ -53,7 +53,6 @@ export class OrderDeliveryState implements State {
     }
 
     async onEnter(): Promise<MessageResponse> {
-        // TODO: Check if the user has enough tokens to start the order
         this.delivery_request.destination = Destination.building;
         this.db.getUser(this.user_id).then((user: User) => {
             this.delivery_request.destination = floorToDestination(user.floor);

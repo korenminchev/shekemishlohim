@@ -44,7 +44,7 @@ export class RegisterState implements State {
     async onEnter() : Promise<MessageResponse> {
         console.log("Entering Register state");
         this.stage = RegisterStage.WaitingForName;
-        return new MessageResponse(NAME_REQUEST);
+        return null;
     }
 
     async handle(message: Message, user_id: string) : Promise<StateResponse> {
