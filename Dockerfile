@@ -18,3 +18,5 @@ ENV PUPPETEER_EXECUTABLE_PATH /usr/bin/chromium
 RUN npm install
 
 COPY --chown=node . /app
+RUN npx tsc
+CMD ["node", "compiled/src/main.js"]
