@@ -14,18 +14,20 @@ export class MongoDB implements DB {
 
     async getUser(phone_number: string): Promise<User> {
         const doc = await this.db.collection("users").findOne({ phone_number: phone_number });
-        return new User(doc.phone_number, doc.name, doc.token_count, doc.floor, doc.office_number);
+        return new User(doc.phone_number, doc.name, doc.token_count, doc.floor, doc.office_number, doc.delivery_id);
     }
 
     async updateUser(user: User): Promise<User> {
-        
+        console.log(`Updating user ${user.phone_number}`);
+        console.log(user);
         await this.db.collection("users").updateOne({ phone_number: user.phone_number }, {
             $set: {
                 name: user.name,
                 token_count: user.token_count,
                 floor: user.floor,
-                office_number: user.office_number
-            }, options: { upsert: true }
+                office_number: user.office_number,
+                delivery_id: user.delivery_id
+            }
         });
         return user;
     }
@@ -39,8 +41,13 @@ export class MongoDB implements DB {
         return this.db.collection("users").countDocuments();
     }
 
-    increaseUniqueMessagesCount() : Promise<void> {
+    increaseUniqueMessagesCount(): Promise<void> {
         this.db.collection("data").updateOne({}, { $inc: { unique_messages_count: 1 } });
+        return Promise.resolve();
+    }
+
+    saveFeedback(user_id: string, feedback: string): Promise<void> {
+        this.db.collection("feedback").insertOne({user_id: user_id, feedback: feedback });
         return Promise.resolve();
     }
 }

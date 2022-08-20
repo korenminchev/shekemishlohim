@@ -6,6 +6,7 @@ export interface DB {
     updateUser(user: User): Promise<User>;
     userCount(): Promise<number>;
     increaseUniqueMessagesCount() : Promise<void>;
+    saveFeedback(user_id: string, feedback: string): Promise<void>;
 }
 
 export class RecordNotFound extends Error {

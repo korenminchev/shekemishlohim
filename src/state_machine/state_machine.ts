@@ -1,4 +1,5 @@
 import { Chat, Message, Contact } from "whatsapp-web.js";
+import { ChatFinder } from "../bot_tools/chat_finder";
 import { DB } from "../db/db";
 import { MessageResponse } from "./message_response";
 import { State } from "./state";
@@ -21,25 +22,40 @@ export class StateMachine {
 
     async handleMessage(message: Message): Promise<void> {
         var state_result = await this.state.handle(message, this.phone_number);
-        this.respond(state_result.response);
+        await this.respond(state_result.response);
 
         if (state_result.next_state == this.state) {
             return;
         }
 
-        this.state = state_result.next_state;
-        var response = this.state.onEnter();
+        var response = await state_result.next_state.onEnter();
         if (response != null) {
             this.respond(response);
+
+            if (response.enter_state) {
+                this.state = state_result.next_state;
+            }
+            return;
         }
+
+        this.state = state_result.next_state;        
     }
 
-    respond(response: MessageResponse) {
-        this.chat.sendMessage(response.sender_response);
+    async respond(response: MessageResponse) {
+        if (response.sender_response != null) {
+            this.chat.sendMessage(response.sender_response);
+        }
         if (!response.additional_receivers) {
             return;
         }
 
-        response.additional_receivers.forEach(receiver => receiver.chat.sendMessage(receiver.response));
+        for (var i = 0; i < response.additional_receivers.length; i++) {
+            var receiver = response.additional_receivers[i];
+            var chat = await ChatFinder.findChat(receiver.chat);
+            if (chat == null) {
+                continue;
+            }
+            chat.sendMessage(receiver.response);
+        }
     }
 }

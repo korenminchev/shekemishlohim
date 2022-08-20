@@ -1,9 +1,10 @@
 {
   "dependencies": {
+    "axios": "^0.27.2",
     "mongodb": "^4.7.0",
+    "qrcode-terminal": "^0.12.0",
     "ts-jest": "^28.0.5",
-    "whatsapp-web.js": "^1.17.1",
-    "qrcode-terminal": "^0.12.0"
+    "whatsapp-web.js": "^1.17.1"
   },
   "scripts": {
     "test:unit": "ENV_FILE=./config/.env.test jest"

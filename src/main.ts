@@ -2,6 +2,8 @@ const qrcode = require('qrcode-terminal');
 import { ClientManager } from './client_manager';
 import { Client, LocalAuth, Chat, Message } from 'whatsapp-web.js'
 import { MongoDB } from './db/mongo/mongo_db';
+import { Backend } from './backend/backend';
+import { ChatFinder } from './bot_tools/chat_finder';
 
 async function main() {
     console.log("Shekemishlohim Bot!");
@@ -14,6 +16,10 @@ async function main() {
     var mongoDb = new MongoDB();
     await mongoDb.init();
     console.log(`MongoDB initialized with ${await mongoDb.userCount()} users`);
+
+    Backend.init("backend", 3000);
+    ChatFinder.init(client);
+
     var client_manager = new ClientManager(mongoDb);
 
     client.on('qr', (qr: any) => {
@@ -26,7 +32,7 @@ async function main() {
     });
 
     client.on('message', (message: Message) => {
-        if (message.body.length === 0) {
+        if (message.body.length === 0 && !message.hasMedia) {
             console.log("Empty message");
             return;
         }

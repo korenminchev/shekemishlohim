@@ -1,3 +1,7 @@
 node_modules
 mongodb
 .wwebjs_auth
+db_backup
+compiled
+diagnostic.data
+journal
