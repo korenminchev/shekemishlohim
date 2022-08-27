@@ -5,11 +5,13 @@ import { State } from "../state";
 import { StateResponse } from "../state_response";
 import { WelcomeState } from "./welcome";
 import { User } from "../../models/user";
-import { DeliveryRequest, destinationToHebrewString, floorToDestination } from "../../models/delivery_request";
+import { DeliveryRequest, destinationToHebrewString, floorToDestination, Source } from "../../models/delivery_request";
 import { Backend } from "../../backend/backend";
 import { botGenericInputError } from "../../models/bot_generic_messages";
 
 const userInputs = {
+    lotem: "לוטם",
+    shakmaz: "שקמז",
     confirm: "אישור",
     next: "הבא",
     cancel: "ביטול"
@@ -40,12 +42,19 @@ const botMessages = {
     payementTipRecepeient: `*טיפ:* ניתן להעביר כסף בביט גם כאשר איש הקשר לא שמור, ע״י הזנת מספר הטלפון במקום האיש קשר`,
     payementTipJester: `*טיפ:* ניתן לבקש כסף בביט גם כאשר איש הקשר לא שמור, ע״י הזנת מספר הטלפון במקום האיש קשר`,
 
+    source: `באיזה שקם אתה😃
+*לוטם*
+*שקמז*
+
+*ביטול*❌ - לביטול הג׳סטה`,
+
     sadLeave: `חבל לי שביטלת את הג׳סטה😞
 אפשר לתת לי פידבק בשליחת *פידבק*, אשמח לשמוע📝
 תודה בכל זאת🙇`,
 }
 
 enum PickupState {
+    Location,
     Choosing,
     Delivering,
 }
@@ -66,6 +75,7 @@ export class BringDeliveryState implements State {
     user: User;
     deliveries: DeliveryRequest[];
     deliveryIndex: number = 0;
+    deliverySource: Source;
 
     constructor(db: DB, user: User) {
         this.db = db;
@@ -73,19 +83,38 @@ export class BringDeliveryState implements State {
     }
 
     async onEnter(): Promise<MessageResponse> {
-        const destination = floorToDestination(this.user.floor);
-        return Backend.getDeliveries(destination, this.user.phone_number).then((deliveries) => {
-            this.deliveries = deliveries
-            if (this.deliveries == null || this.deliveries.length == 0) {
-                return new MessageResponse(botMessages.noDeliveries, null, false);
-            }
-            this.pickupState = PickupState.Choosing;
-            return new MessageResponse(formatDelivery(this.deliveries[this.deliveryIndex]));
-        });
+        return new MessageResponse(botMessages.source);
     }
 
     async handle(message: Message): Promise<StateResponse> {
         switch (this.pickupState) {
+            case PickupState.Location:
+                switch (message.body) {
+                    case userInputs.lotem:
+                        this.deliverySource = Source.lotem;
+                        break;
+
+                    case userInputs.shakmaz:
+                        this.deliverySource = Source.shakmaz;
+                        break;
+
+                    case userInputs.cancel:
+                        return new StateResponse(new WelcomeState(this.db), new MessageResponse(botMessages.sadLeave));
+
+                    default:
+                        return new StateResponse(this, new MessageResponse(botGenericInputError + "\n" + botMessages.source));
+                }
+
+                const destination = floorToDestination(this.user.floor);
+                return Backend.getDeliveries(this.user.phone_number, destination, this.deliverySource).then((deliveries) => {
+                    this.deliveries = deliveries;
+                    if (this.deliveries == null || this.deliveries.length == 0) {
+                        return new StateResponse(new WelcomeState(this.db), new MessageResponse(botMessages.noDeliveries));
+                    }
+                    this.pickupState = PickupState.Choosing;
+                    return new StateResponse(this, new MessageResponse(formatDelivery(this.deliveries[this.deliveryIndex])));
+                });
+
             case PickupState.Choosing:
                 return this.handleChoosing(message);
 
@@ -109,7 +138,7 @@ export class BringDeliveryState implements State {
 
     async handleChoosing(nessage: Message): Promise<StateResponse> {
         switch (nessage.body) {
-            case userInputs.confirm:    
+            case userInputs.confirm:
                 var success: boolean = await Backend.acceptDelivery(this.deliveries[this.deliveryIndex].receiver_id, this.user.phone_number);
                 if (!success) {
                     return new StateResponse(this, new MessageResponse(botMessages.sadLeave));
