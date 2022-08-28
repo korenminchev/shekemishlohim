@@ -128,7 +128,7 @@ export class WelcomeState implements State {
                 case "ש":
                     var additional_data = [];
                     var status: UserStatus = await (Backend.getUserStatus(user_id));
-                    if (status != UserStatus.no_delivery) {
+                    if (status != null && status != UserStatus.no_delivery) {
                         additional_data = [{
                             chat: user_id,
                             response: botMessages.haveAnActiveOrder + botMessages.youCanCancelOrder

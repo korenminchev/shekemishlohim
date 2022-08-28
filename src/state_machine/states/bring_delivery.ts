@@ -83,6 +83,7 @@ export class BringDeliveryState implements State {
     }
 
     async onEnter(): Promise<MessageResponse> {
+        this.pickupState = PickupState.Location;
         return new MessageResponse(botMessages.source);
     }
 
@@ -128,10 +129,20 @@ export class BringDeliveryState implements State {
                 this.user.token_count++;
                 this.db.updateUser(this.user);
                 Backend.closeDelivery(receiver.phone_number);
-                return new StateResponse(new WelcomeState(this.db), new MessageResponse(botMessages.thankYou + receiver.name.split(" ")[0] + " - " + receiver.phone_number + '\n' + botMessages.payementTipJester, [
-                    { chat: receiver.phone_number, response: image },
-                    { chat: receiver.phone_number, response: botMessages.receiverArrived + this.user.name.split(" ")[0] + " - " + this.user.phone_number + "\n" + botMessages.payementTipRecepeient }
-                ]
+                return new StateResponse(new WelcomeState(this.db), new MessageResponse(botMessages.thankYou
+                    + receiver.name.split(" ")[0] + " - " + receiver.phone_number.replace(RegExp("^972"), "0")
+                    + `\nלהודעה - wa.me/${receiver.phone_number}`
+                    + '\n' + botMessages.payementTipJester,
+                    [
+                        { chat: receiver.phone_number, response: image },
+                        {
+                            chat: receiver.phone_number, response: botMessages.receiverArrived
+                                + this.user.name.split(" ")[0] + " - "
+                                + this.user.phone_number.replace(RegExp("^972"), "0")
+                                + `\nלהודעה - wa.me/${this.user.phone_number}`
+                                + "\n" + botMessages.payementTipRecepeient
+                        }
+                    ]
                 ));
         }
     }
