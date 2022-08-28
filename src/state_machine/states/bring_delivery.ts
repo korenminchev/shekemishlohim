@@ -21,12 +21,16 @@ const botMessages = {
     noDeliveries: `אין משלוחים כרגע😅
 תודה על הג׳סטה בכל זאת🙇`,
 
-    deliveryPickedUp: `תודה על הג׳סטה🙇
-רק נשאר להשאיר את השקית בעמדת המשלוחים ולצלם תמונה📸
+    deliveryPickedUp: `רק נשאר להשאיר את השקית בעמדת המשלוחים ולצלם תמונה📸
 *לא לשכוח לשים קבלה בשקית*😉`,
 
     recipientPickedup: `היי! המשלוח שלך נאסף🛵🥳
 כאשר הוא יגיע תשלח אליך תמונה כדי שיהיה לך נוח לאסוף אותו!`,
+
+notNumber: `זה לא נראה לי כמו מספר😅`,
+
+priceRequest: `תודה רבה על הג׳סטה😍
+כמה עלה לך המשלוח?`,
 
     notImage: `אני לא חושב שזאת תמונה😅
 בשביל לסיים את הג׳סטה אני צריך רק תמונה של השקית בעמדת המשלוחים📸`,
@@ -51,11 +55,15 @@ const botMessages = {
     sadLeave: `חבל לי שביטלת את הג׳סטה😞
 אפשר לתת לי פידבק בשליחת *פידבק*, אשמח לשמוע📝
 תודה בכל זאת🙇`,
+
+criticalError: `הייתה לי תקלה קריטית🤧
+סליחה, כבר בודק את זה🔍`
 }
 
 enum PickupState {
     Location,
     Choosing,
+    Price,
     Delivering,
 }
 
@@ -76,6 +84,7 @@ export class BringDeliveryState implements State {
     deliveries: DeliveryRequest[];
     deliveryIndex: number = 0;
     deliverySource: Source;
+    deliveryPrice: number;
 
     constructor(db: DB, user: User) {
         this.db = db;
@@ -119,6 +128,16 @@ export class BringDeliveryState implements State {
             case PickupState.Choosing:
                 return this.handleChoosing(message);
 
+            case PickupState.Price:
+                var price = parseFloat(message.body)
+                if (price == NaN) {
+                    return new StateResponse(this, new MessageResponse(botMessages.notNumber));
+                }
+
+                this.deliveryPrice = price;
+                this.pickupState = PickupState.Delivering;
+                return new StateResponse(this, new MessageResponse(botMessages.deliveryPickedUp));
+
             case PickupState.Delivering:
                 if (!message.hasMedia) {
                     return new StateResponse(this, new MessageResponse(botMessages.notImage));
@@ -140,10 +159,14 @@ export class BringDeliveryState implements State {
                                 + this.user.name.split(" ")[0] + " - "
                                 + this.user.phone_number.replace(RegExp("^972"), "0")
                                 + `\nלהודעה - wa.me/${this.user.phone_number}`
+                                + `\nעליך להעביר ${this.deliveryPrice} לג׳סטר שלך`
                                 + "\n" + botMessages.payementTipRecepeient
                         }
                     ]
                 ));
+
+            default:
+                return new StateResponse(new WelcomeState(this.db), new MessageResponse(botMessages.criticalError));
         }
     }
 
@@ -154,8 +177,8 @@ export class BringDeliveryState implements State {
                 if (!success) {
                     return new StateResponse(this, new MessageResponse(botMessages.sadLeave));
                 }
-                this.pickupState = PickupState.Delivering;
-                return new StateResponse(this, new MessageResponse(botMessages.deliveryPickedUp, [{ chat: this.deliveries[this.deliveryIndex].receiver_id.toString(), response: botMessages.recipientPickedup }]));
+                this.pickupState = PickupState.Price;
+                return new StateResponse(this, new MessageResponse(botMessages.priceRequest, [{ chat: this.deliveries[this.deliveryIndex].receiver_id.toString(), response: botMessages.recipientPickedup }]));
 
             case userInputs.next:
                 this.deliveryIndex++;
