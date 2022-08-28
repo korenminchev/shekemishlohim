@@ -10,4 +10,3 @@ services:
       - seccomp:chrome_secomp.json
     volumes:
       - ./wwebjs_auth:/app/wwebjs_auth
-    command: make run

@@ -13,6 +13,11 @@ export enum Expiration {
     month = 'month'
 }
 
+export enum Source {
+    lotem = 'lotem',
+    shakmaz = 'shakmaz'
+}
+
 export function destinationToHebrewString(destination: Destination): string {
     switch (destination) {
         case Destination.building:
@@ -34,7 +39,7 @@ export function floorToDestination(floor: any): Destination {
     switch (floor) {
         case "s":
             return Destination.topaz;
-        
+
         case "t":
             return Destination.topaz;
 
@@ -53,6 +58,7 @@ export class DeliveryRequest {
 
     receiver_id: string;
     destination: Destination;
+    source: Source;
     expiration: Expiration;
     content: string;
-}   
+}

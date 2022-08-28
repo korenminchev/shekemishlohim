@@ -1,5 +1,5 @@
 import axios from "axios";
-import { DeliveryRequest, Destination } from "../models/delivery_request";
+import { DeliveryRequest, Destination, Source } from "../models/delivery_request";
 import { UserStatus } from "../models/user";
 
 export class Backend {
@@ -43,9 +43,9 @@ export class Backend {
         }
     }
 
-    static async getDeliveries(destination: Destination, user_id: string): Promise<DeliveryRequest[]> {
+    static async getDeliveries(user_id: string, destination: Destination, source: Source): Promise<DeliveryRequest[]> {
         try {
-            const { data, status } = await axios.get<DeliveryRequest[]>(`http://${this.ip}:${this.port}/delivery?destination=${destination}&user_id=${user_id}`);
+            const { data, status } = await axios.get<DeliveryRequest[]>(`http://${this.ip}:${this.port}/delivery?destination=${destination}&user_id=${user_id}&source=${source}`);
             if (status != 200) {
                 return null;
             }

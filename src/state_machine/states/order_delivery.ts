@@ -2,7 +2,7 @@ import { Message } from "whatsapp-web.js";
 import { Backend } from "../../backend/backend";
 import { DB } from "../../db/db";
 import { botGenericInputError } from "../../models/bot_generic_messages";
-import { DeliveryRequest, Destination, Expiration, floorToDestination } from "../../models/delivery_request";
+import { DeliveryRequest, Destination, Source, floorToDestination, Expiration } from "../../models/delivery_request";
 import { User } from "../../models/user";
 import { MessageResponse } from "../message_response";
 import { State } from "../state";
@@ -10,29 +10,32 @@ import { StateResponse } from "../state_response";
 import { WelcomeState } from "./welcome";
 
 enum OrderDeliveryStage {
-    Duration,
+    Location,
     Contents,
 }
 
 const userInputs = {
-    Today: "יום",
-    Week: "שבוע",
-    Month: "חודש",
+    Lotem: "לוטם",
+    Shakmaz: "שקמז",
     Cancel: "ביטול"
 };
 
 const botMessages = {
-deliveryTime: `לכמה זמן הבקשה שלך תהיה רלוונטית?⏳
-*יום*
-*שבוע*
-*חודש*`,
+    deliveryDestination: `מאיפה להביא את הג׳סטה?📍
+*לוטם*
+*שקמז*
+*ביטול*❌`,
 
-contents: `מה באלך מהשקם?🛍️`,
-orderSuccess: `ההזמנה נשלחה בהצלחה✅
+    contents: `מה באלך מהשקם?🛍️`,
+    orderSuccess: `ההזמנה נשלחה בהצלחה✅
 ניתן לשלוח *סטטוס* בשביל לבדוק את מצב ההזמנה📋`,
 
-orderFailure: `סורי, היית שגיאה בקבלת ההזמנה שלך🤕
+    orderFailure: `סורי, היית שגיאה בקבלת ההזמנה שלך🤕
 אני בודק את זה🔍, בינתיים אפשר לנסות שוב`,
+
+    sadLeave: `חבל לי שביטלת את הג׳סטה😞
+אפשר לתת לי פידבק בשליחת *פידבק*, אשמח לשמוע📝
+תודה בכל זאת🙇`,
 }
 
 export class OrderDeliveryState implements State {
@@ -58,35 +61,39 @@ export class OrderDeliveryState implements State {
             this.delivery_request.destination = floorToDestination(user.floor);
             this.user = user;
         });
-        this.order_stage = OrderDeliveryStage.Duration;
-        return new MessageResponse(botMessages.deliveryTime);
+        this.order_stage = OrderDeliveryStage.Location;
+        return new MessageResponse(botMessages.deliveryDestination);
     }
 
     async handle(message: Message, user_id: string): Promise<StateResponse> {
         switch (this.order_stage) {
-            case OrderDeliveryStage.Duration:
+            case OrderDeliveryStage.Location:
                 switch (message.body) {
-                    case userInputs.Today:
-                        this.delivery_request.expiration = Expiration.day;
+                    case userInputs.Lotem:
+                        this.delivery_request.source = Source.lotem;
                         break;
 
-                    case userInputs.Week:
-                        this.delivery_request.expiration = Expiration.week;
+                    case userInputs.Shakmaz:
+                        this.delivery_request.source = Source.shakmaz;
                         break;
 
-                    case userInputs.Month:
-                        this.delivery_request.expiration = Expiration.month;
+                    case userInputs.Cancel:
+                        new StateResponse(new WelcomeState(this.db), new MessageResponse(botMessages.sadLeave));
                         break;
 
                     default:
-                        return new StateResponse(this, new MessageResponse(botGenericInputError + "\n" + botMessages.deliveryTime));
+                        return new StateResponse(this, new MessageResponse(botGenericInputError + "\n" + botMessages.deliveryDestination));
                 }
 
                 this.order_stage = OrderDeliveryStage.Contents;
                 return new StateResponse(this, new MessageResponse(botMessages.contents));
 
             case OrderDeliveryStage.Contents:
+                if (message.body == userInputs.Cancel) {
+                    return new StateResponse(new WelcomeState(this.db), new MessageResponse(botMessages.sadLeave));
+                }
                 this.delivery_request.content = message.body
+                this.delivery_request.expiration = Expiration.month;
                 return Backend.createDelivery(this.delivery_request).then((success: boolean) => {
                     if (success) {
                         this.user.token_count -= 1;
