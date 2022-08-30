@@ -49,6 +49,9 @@ const botMessages = {
     payementTipRecepeient: `*טיפ:* ניתן להעביר כסף בביט גם כאשר איש הקשר לא שמור, ע״י הזנת מספר הטלפון במקום האיש קשר`,
     payementTipJester: `*טיפ:* ניתן לבקש כסף בביט גם כאשר איש הקשר לא שמור, ע״י הזנת מספר הטלפון במקום האיש קשר`,
 
+    itemMissing: `מצטער להודיע אבל הג׳סטר שלך דיווח שהמוצר שרצית לא במלאי😔
+המשלוח עדיין פעיל, לביטול ניתן לרשום *ביטול*❌`,
+
     source: `באיזה שקם אתה😃
 *לוטם*
 *שקמז*
@@ -88,13 +91,13 @@ export class BringDeliveryState implements State {
     }
 
     async formatDelivery(delivery: DeliveryRequest): Promise<string> {
+        console.log(delivery);
         var receiver: User = await this.db.getUser(delivery.receiver_id)
 
 
-        return `משלוח ל${receiver.firstName} מ${receiver.floorAsString}
-        להודעה - wa.me/${receiver.phone_number}
-        
-        ${delivery.content}
+        return `משלוח ל${receiver.firstName} מ${receiver.floorAsString}😃
+
+${delivery.content}
     
 *אישור* - לאישור הג׳סטה🛵
 *הבא* - לקבלת בקשה אחרת⏭️
@@ -143,7 +146,8 @@ export class BringDeliveryState implements State {
                     case userInputs.missing:
                         this.deliveryIndex++;
                         this.pickupState = PickupState.Choosing;
-                        return new StateResponse(this, new MessageResponse(botMessages.noted, [{ chat: user_id, response: await this.formatDelivery(this.deliveries[this.deliveryIndex]) }]))
+                        // TODO: remove deliveryman from db
+                        return new StateResponse(this, new MessageResponse(botMessages.noted, [{ chat: user_id, response: await this.formatDelivery(this.deliveries[this.deliveryIndex]) }, { chat: this.deliveries[this.deliveryIndex].receiver_id, response: botMessages.itemMissing }]))
 
                     default:
                         var price = parseFloat(message.body)

@@ -1,5 +1,5 @@
 export class User {
-    
+
     phone_number: string;
     name: string;
     token_count: number;
@@ -27,23 +27,23 @@ export class User {
         return this.delivery_id != null && this.delivery_id != -1;
     }
 
-    get firstName() : string {
+    get firstName(): string {
         return this.name.split(" ")[0];
     }
 
-    get floorAsString() : string{
+    get floorAsString(): string {
         switch (this.floor) {
-        case "s":
-            return "ס׳";
-        
-        case "t":
-            return "טופז";
+            case "s":
+                return "ס׳";
 
-        case "g":
-            return "ג׳נסיס";
+            case "t":
+                return "טופז";
 
-        default:
-            return "קומה" + this.floor.toString();
+            case "g":
+                return "ג׳נסיס";
+
+            default:
+                return "קומה " + this.floor.toString();
         }
     }
 }
