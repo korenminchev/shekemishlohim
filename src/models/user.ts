@@ -26,6 +26,26 @@ export class User {
     hasDelivery(): boolean {
         return this.delivery_id != null && this.delivery_id != -1;
     }
+
+    get firstName() : string {
+        return this.name.split(" ")[0];
+    }
+
+    get floorAsString() : string{
+        switch (this.floor) {
+        case "s":
+            return "ס׳";
+        
+        case "t":
+            return "טופז";
+
+        case "g":
+            return "ג׳נסיס";
+
+        default:
+            return "קומה" + this.floor.toString();
+        }
+    }
 }
 
 export enum UserStatus {
