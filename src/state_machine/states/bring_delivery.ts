@@ -91,7 +91,9 @@ export class BringDeliveryState implements State {
         var receiver: User = await this.db.getUser(delivery.receiver_id)
 
 
-        return `משלוח ל${receiver.firstName} מ${receiver.floorAsString}:
+        return `משלוח ל${receiver.firstName} מ${receiver.floorAsString}
+        להודעה - wa.me/${receiver.phone_number}
+        
         ${delivery.content}
     
 *אישור* - לאישור הג׳סטה🛵
