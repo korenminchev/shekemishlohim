@@ -57,9 +57,13 @@ export class Backend {
         }
     }
 
-    static async acceptDelivery(receiver_id: string, jester_id: string): Promise<boolean> {
+    static async acceptDelivery(receiver_id: string, jester_id: string | null): Promise<boolean> {
         try {
-            const { data, status } = await axios.put(`http://${this.ip}:${this.port}/delivery/${receiver_id}?deliveryman_id=${jester_id}`);
+            var queryParam = "";
+            if (jester_id != null) {
+                queryParam = `?deliveryman_id=${jester_id}`;
+            }
+            const { data, status } = await axios.put(`http://${this.ip}:${this.port}/delivery/${receiver_id}${queryParam}`);
             if (status != 200) {
                 return false;
             }

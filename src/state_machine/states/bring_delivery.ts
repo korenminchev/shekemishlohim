@@ -32,6 +32,9 @@ const botMessages = {
 
     noted: `רשמתי לעצמי🗒️`,
 
+    noMoreDeliveries: `אין עוד משלוחים כרגע😔
+תודה על הג׳סטה בכל זאת🙇`,
+
     priceRequest: `תודה רבה על הג׳סטה😍
 כמה עלה לך המשלוח?`,
 
@@ -82,6 +85,7 @@ export class BringDeliveryState implements State {
     user: User;
     deliveries: DeliveryRequest[];
     deliveryIndex: number = 0;
+    missingDeliveries: number = 0;
     deliverySource: Source;
     deliveryPrice: number;
 
@@ -144,15 +148,38 @@ ${delivery.content}
             case PickupState.Price:
                 switch (message.body) {
                     case userInputs.missing:
-                        this.deliveryIndex++;
                         this.pickupState = PickupState.Choosing;
-                        // TODO: remove deliveryman from db
-                        return new StateResponse(this, new MessageResponse(botMessages.noted, [{ chat: user_id, response: await this.formatDelivery(this.deliveries[this.deliveryIndex]) }, { chat: this.deliveries[this.deliveryIndex].receiver_id, response: botMessages.itemMissing }]))
+                        var receiver_id: string = this.deliveries[this.deliveryIndex].receiver_id
+                        // Remove deliveryman from db
+                        var success: boolean = await Backend.acceptDelivery(receiver_id, null);
+                        if (!success) {
+                            return new StateResponse(new WelcomeState(this.db), new MessageResponse(botMessages.criticalError));
+                        }
+
+                        // Remove the delivery from the users deliveries
+                        this.deliveries.splice(this.deliveryIndex, 1);
+                        this.deliveryIndex++;
+                        if (this.deliveryIndex >= this.deliveries.length) {
+                            this.deliveryIndex = 0;
+                        }
+
+                        var nextState: State = this;
+                        var deliverymanMessage: string;
+
+                        // If there are no more deliveries
+                        if (this.deliveries.length == 0) {
+                            nextState = new WelcomeState(this.db);
+                            deliverymanMessage = botMessages.noMoreDeliveries;
+                        } else {
+                            deliverymanMessage = await this.formatDelivery(this.deliveries[this.deliveryIndex])
+                        }
+
+                        return new StateResponse(nextState, new MessageResponse(botMessages.noted, [{ chat: user_id, response: deliverymanMessage }, { chat: receiver_id, response: botMessages.itemMissing }]))
 
                     default:
                         var price = parseFloat(message.body)
                         console.log(price);
-                        if (price == NaN) {
+                        if (isNaN(price)) {
                             return new StateResponse(this, new MessageResponse(botMessages.notNumber));
                         }
 
