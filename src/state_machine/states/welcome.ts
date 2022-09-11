@@ -11,6 +11,7 @@ import { BringDeliveryState } from "./bring_delivery";
 import { destinationToHebrewString, floorToDestination } from "../../models/delivery_request";
 import { Backend } from "../../backend/backend";
 import { UserStatus } from "../../models/user";
+import { BroadcastState } from "./broadcast";
 
 const UNRECOGNIZED_COMMAND = botGenericInputError + ` אפשר לשלוח לי *עזרה* בשביל לראות את כל האוציותℹ️`
 
@@ -217,6 +218,12 @@ export class WelcomeState implements State {
                 case "מידע":
                     response = new StateResponse(this, new MessageResponse(botMessages.info));
                     break;
+
+                case "שידור מנהל":
+                    if (user_id == "972544917728" || user_id == "972547707389") {
+                        response = new StateResponse(new BroadcastState(this.db), new MessageResponse("שידור"))
+                        break;
+                    }
 
                 default:
                     response = new StateResponse(this, new MessageResponse(botMessages.unrecognized));
