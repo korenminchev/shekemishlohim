@@ -14,7 +14,8 @@ const userInputs = {
     shakmaz: "שקמז",
     confirm: "אישור",
     next: "הבא",
-    cancel: "ביטול"
+    cancel: "ביטול",
+    missing: "אין בשקם"
 }
 
 const botMessages = {
@@ -27,10 +28,17 @@ const botMessages = {
     recipientPickedup: `היי! המשלוח שלך נאסף🛵🥳
 כאשר הוא יגיע תשלח אליך תמונה כדי שיהיה לך נוח לאסוף אותו!`,
 
-notNumber: `זה לא נראה לי כמו מספר😅`,
+    notNumber: `זה לא נראה לי כמו מספר😅`,
 
-priceRequest: `תודה רבה על הג׳סטה😍
-כמה עלה לך המשלוח?`,
+    noted: `רשמתי לעצמי🗒️`,
+
+    noMoreDeliveries: `אין עוד משלוחים כרגע😔
+תודה על הג׳סטה בכל זאת🙇`,
+
+    priceRequest: `תודה רבה על הג׳סטה😍
+כמה עלה לך המשלוח?
+
+*אין בשקם* - אם המוצר לא במלאי😔`,
 
     notImage: `אני לא חושב שזאת תמונה😅
 בשביל לסיים את הג׳סטה אני צריך רק תמונה של השקית בעמדת המשלוחים📸`,
@@ -46,6 +54,9 @@ priceRequest: `תודה רבה על הג׳סטה😍
     payementTipRecepeient: `*טיפ:* ניתן להעביר כסף בביט גם כאשר איש הקשר לא שמור, ע״י הזנת מספר הטלפון במקום האיש קשר`,
     payementTipJester: `*טיפ:* ניתן לבקש כסף בביט גם כאשר איש הקשר לא שמור, ע״י הזנת מספר הטלפון במקום האיש קשר`,
 
+    itemMissing: `מצטער להודיע אבל הג׳סטר שלך דיווח שהמוצר שרצית לא במלאי😔
+המשלוח עדיין פעיל, לביטול ניתן לרשום *ביטול*❌`,
+
     source: `באיזה שקם אתה😃
 *לוטם*
 *שקמז*
@@ -56,7 +67,7 @@ priceRequest: `תודה רבה על הג׳סטה😍
 אפשר לתת לי פידבק בשליחת *פידבק*, אשמח לשמוע📝
 תודה בכל זאת🙇`,
 
-criticalError: `הייתה לי תקלה קריטית🤧
+    criticalError: `הייתה לי תקלה קריטית🤧
 סליחה, כבר בודק את זה🔍`
 }
 
@@ -67,13 +78,6 @@ enum PickupState {
     Delivering,
 }
 
-function formatDelivery(delivery: DeliveryRequest): string {
-    return `${delivery.content}
-
-*אישור* - לאישור הג׳סטה🛵
-*הבא* - לקבלת בקשה אחרת⏭️
-*ביטול* - לביטול הג׳סטה❌`;
-}
 
 export class BringDeliveryState implements State {
     db: DB;
@@ -91,12 +95,26 @@ export class BringDeliveryState implements State {
         this.user = user;
     }
 
+    async formatDelivery(delivery: DeliveryRequest): Promise<string> {
+        console.log(delivery);
+        var receiver: User = await this.db.getUser(delivery.receiver_id)
+
+
+        return `משלוח ל${receiver.firstName} מ${receiver.floorAsString}😃
+
+${delivery.content}
+    
+*אישור* - לאישור הג׳סטה🛵
+*הבא* - לקבלת בקשה אחרת⏭️
+*ביטול* - לביטול הג׳סטה❌`;
+    }
+
     async onEnter(): Promise<MessageResponse> {
         this.pickupState = PickupState.Location;
         return new MessageResponse(botMessages.source);
     }
 
-    async handle(message: Message): Promise<StateResponse> {
+    async handle(message: Message, user_id: string): Promise<StateResponse> {
         switch (this.pickupState) {
             case PickupState.Location:
                 switch (message.body) {
@@ -116,27 +134,59 @@ export class BringDeliveryState implements State {
                 }
 
                 const destination = floorToDestination(this.user.floor);
-                return Backend.getDeliveries(this.user.phone_number, destination, this.deliverySource).then((deliveries) => {
+                return Backend.getDeliveries(this.user.phone_number, destination, this.deliverySource).then(async (deliveries) => {
                     this.deliveries = deliveries;
                     if (this.deliveries == null || this.deliveries.length == 0) {
                         return new StateResponse(new WelcomeState(this.db), new MessageResponse(botMessages.noDeliveries));
                     }
                     this.pickupState = PickupState.Choosing;
-                    return new StateResponse(this, new MessageResponse(formatDelivery(this.deliveries[this.deliveryIndex])));
+                    return new StateResponse(this, new MessageResponse(await this.formatDelivery(this.deliveries[this.deliveryIndex])));
                 });
 
             case PickupState.Choosing:
                 return this.handleChoosing(message);
 
             case PickupState.Price:
-                var price = parseFloat(message.body)
-                if (price == NaN) {
-                    return new StateResponse(this, new MessageResponse(botMessages.notNumber));
-                }
+                switch (message.body) {
+                    case userInputs.missing:
+                        this.pickupState = PickupState.Choosing;
+                        var receiver_id: string = this.deliveries[this.deliveryIndex].receiver_id
+                        // Remove deliveryman from db
+                        var success: boolean = await Backend.acceptDelivery(receiver_id, null);
+                        if (!success) {
+                            return new StateResponse(new WelcomeState(this.db), new MessageResponse(botMessages.criticalError));
+                        }
 
-                this.deliveryPrice = price;
-                this.pickupState = PickupState.Delivering;
-                return new StateResponse(this, new MessageResponse(botMessages.deliveryPickedUp));
+                        // Remove the delivery from the users deliveries
+                        this.deliveries.splice(this.deliveryIndex, 1);
+                        this.deliveryIndex++;
+                        if (this.deliveryIndex >= this.deliveries.length) {
+                            this.deliveryIndex = 0;
+                        }
+
+                        var nextState: State = this;
+                        var deliverymanMessage: string;
+
+                        // If there are no more deliveries
+                        if (this.deliveries.length == 0) {
+                            nextState = new WelcomeState(this.db);
+                            deliverymanMessage = botMessages.noMoreDeliveries;
+                        } else {
+                            deliverymanMessage = await this.formatDelivery(this.deliveries[this.deliveryIndex])
+                        }
+
+                        return new StateResponse(nextState, new MessageResponse(botMessages.noted, [{ chat: user_id, response: deliverymanMessage }, { chat: receiver_id, response: botMessages.itemMissing }]))
+
+                    default:
+                        var price = parseFloat(message.body)
+                        if (isNaN(price)) {
+                            return new StateResponse(this, new MessageResponse(botMessages.notNumber));
+                        }
+
+                        this.deliveryPrice = price;
+                        this.pickupState = PickupState.Delivering;
+                        return new StateResponse(this, new MessageResponse(botMessages.deliveryPickedUp));
+                }
 
             case PickupState.Delivering:
                 if (!message.hasMedia) {
@@ -185,13 +235,13 @@ export class BringDeliveryState implements State {
                 if (this.deliveryIndex >= this.deliveries.length) {
                     this.deliveryIndex = 0;
                 }
-                return new StateResponse(this, new MessageResponse(formatDelivery(this.deliveries[this.deliveryIndex])));
+                return new StateResponse(this, new MessageResponse(await this.formatDelivery(this.deliveries[this.deliveryIndex])));
 
             case userInputs.cancel:
                 return new StateResponse(new WelcomeState(this.db), new MessageResponse(botMessages.sadLeave));
 
             default:
-                return new StateResponse(this, new MessageResponse(botGenericInputError + "\nהג׳סטה שביקשו" + formatDelivery(this.deliveries[this.deliveryIndex])));
+                return new StateResponse(this, new MessageResponse(botGenericInputError + "\nהג׳סטה שביקשו" + await this.formatDelivery(this.deliveries[this.deliveryIndex])));
         }
     }
 }

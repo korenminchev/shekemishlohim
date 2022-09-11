@@ -37,7 +37,8 @@ async function main() {
             return;
         }
         message.getChat().then((chat: Chat) => {
-            // if (chat.id._serialized != "972544917728@c.us" && chat.id._serialized != "972547707389@c.us") {
+            // if (chat.id._serialized != "972544917728@c.us" && chat.id._serialized != "972547707389@c.us" &&
+            //     chat.id._serialized != "972522232850@c.us") {
             //     chat.sendMessage("סליחה, הבוט בשיפוצים כרגע🛠️");
             //     return;
             // }

@@ -21,14 +21,14 @@ const botMessages = {
 עם *ג׳סטה*, חברים(ג׳סטרים) שכבר נמצאים בשקם יוכלו לקחת הזמנה שלכם ולהביא אותה קרוב מספיק אליכם!
 כל זה בציפייה שכשאתם תהיו שם אז תעשו ג׳סטה מדי פעם😉`,
 
-nameRequest: `אז בואו נתחיל, רק 2 פרטים קטנים!
+    nameRequest: `אז בואו נתחיל, רק 2 פרטים קטנים!
 איך קוראים לך?`,
 
-unregisteredJester: `היי, צריך להרשם לפני שיהיה אפשר לעשות ג׳סטה😊
+    unregisteredJester: `היי, צריך להרשם לפני שיהיה אפשר לעשות ג׳סטה😊
 *הרשמה* - להרשמות לג׳סטה📝
 *עזרה* - לכל הפעולותℹ️`,
 
-unregisteredDelivery: `היי, צריך להרשם לפני שיהיה אפשר לבקש ג׳סטה😊
+    unregisteredDelivery: `היי, צריך להרשם לפני שיהיה אפשר לבקש ג׳סטה😊
 *הרשמה* - להרשמות לג׳סטה📝
 *עזרה* - לכל הפעולותℹ️`,
 
@@ -38,7 +38,7 @@ unregisteredDelivery: `היי, צריך להרשם לפני שיהיה אפשר 
 באלך משלוח?🛵 שלח *מ*
 אפשר לשלוח לי *עזרה* בשביל לראות את כל האופציותℹ️`,
 
-unregisteredUnrecognized: botGenericInputError + `
+    unregisteredUnrecognized: botGenericInputError + `
 
 *הרשמה* - הרשמות לג׳סטה📝
 *עזרה* - לכל הפעולות`,
@@ -55,7 +55,7 @@ unregisteredUnrecognized: botGenericInputError + `
 *מידע* - מידע נוסף על הקונספט של ג׳סטה
 לעוד מידע ושאלות מוזמנים לכתוב לקורן - https://wa.me/972544917728`,
 
-unregisteredHelp: `*ג׳סטה* 😉 - הבוט למשלוחים מהשקם
+    unregisteredHelp: `*ג׳סטה* 😉 - הבוט למשלוחים מהשקם
 *פידבק* - להשארת פידבק, בעיות והצעות לשיפור השירות 📝
 *מידע* - מידע נוסף על הקונספט של ג׳סטהℹ️
 *הרשמה* - הרשמות לג׳סטה
@@ -63,6 +63,9 @@ unregisteredHelp: `*ג׳סטה* 😉 - הבוט למשלוחים מהשקם
 
     feedbackAccepted: `תודה על הפידבק!🙇 רשמתי לעצמי`,
     noActiveDelivery: `היי😄 אין לך כרגע משלוח שמחכה לאיסוף. להזמנת משלוח אפשר לשלוח *מ* או *משלוח*`,
+
+    deliveryAssigned: `היי, לא ניתן לבטל את השמלוח כי הוא כבר בדרך🏃‍♂️`,
+
     orderWaitingForDelivery: `ההזמנה שלך מחכה שמישהו יקח אותה מהשקם🛵
 לביטול ההזמנה - *ביטול*`,
     orderCancelled: `ההזמנה בוטלה בהצלחה👍
@@ -192,6 +195,11 @@ export class WelcomeState implements State {
                         break;
                     }
 
+                    if (status == UserStatus.assigned_delivery) {
+                        response = new StateResponse(this, new MessageResponse(botMessages.deliveryAssigned));
+                        break;
+                    }
+
                     await Backend.closeDelivery(user.phone_number).then((success: boolean) => {
                         if (success) {
                             user.token_count += 1;
@@ -217,13 +225,13 @@ export class WelcomeState implements State {
             this.db.increaseUniqueMessagesCount();
             switch (message.body) {
                 case "היי, מה זה ג׳סטה?":
-                    response = new StateResponse(new RegisterState(this.db), new MessageResponse(botMessages.explenationMessage, [{chat: user_id, response: botMessages.nameRequest}]));
+                    response = new StateResponse(new RegisterState(this.db), new MessageResponse(botMessages.explenationMessage, [{ chat: user_id, response: botMessages.nameRequest }]));
                     break;
 
                 case "שקם":
                 case "אני בשקם":
                 case "ש":
-                    response = new StateResponse(this, new MessageResponse(botMessages. unregisteredJester));
+                    response = new StateResponse(this, new MessageResponse(botMessages.unregisteredJester));
                     break;
 
                 case "משלוח":
@@ -234,11 +242,11 @@ export class WelcomeState implements State {
                 case "מידע":
                     response = new StateResponse(this, new MessageResponse(botMessages.info));
                     break;
-                
+
                 case "עזרה":
                     response = new StateResponse(this, new MessageResponse(botMessages.unregisteredHelp));
                     break;
-                
+
                 case "הרשמה":
                     response = new StateResponse(new RegisterState(this.db), new MessageResponse(botMessages.nameRequest));
                     break;
