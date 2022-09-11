@@ -32,6 +32,15 @@ export class MongoDB implements DB {
         return user;
     }
 
+    async getBroadcastUsers(): Promise<User[]> {
+        const docs = await this.db.collection("users").find({ broadcast: true })
+        var usersArray: User[] = [];
+        await docs.forEach((doc) => {
+            usersArray.push(new User(doc.phone_number, doc.name, doc.token_count, doc.floor, doc.office_number, doc.delivery_id));
+        });
+        return usersArray;
+    }
+
     async createUser(user: User): Promise<User> {
         await this.db.collection("users").insertOne(user);
         return user;
@@ -47,7 +56,7 @@ export class MongoDB implements DB {
     }
 
     saveFeedback(user_id: string, feedback: string): Promise<void> {
-        this.db.collection("feedback").insertOne({user_id: user_id, feedback: feedback });
+        this.db.collection("feedback").insertOne({ user_id: user_id, feedback: feedback });
         return Promise.resolve();
     }
 }

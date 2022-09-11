@@ -1,5 +1,6 @@
 import { Message } from "whatsapp-web.js";
 import { DB } from "../../db/db";
+import { User } from "../../models/user";
 import { MessageResponse } from "../message_response";
 import { State } from "../state";
 import { StateResponse } from "../state_response";
@@ -7,7 +8,7 @@ import { WelcomeState } from "./welcome";
 
 enum BroadcastStage {
     validation,
-    broadcast    
+    broadcast
 }
 
 
@@ -43,16 +44,18 @@ export class BroadcastState implements State {
 
     async handle(message: Message, user_id: string): Promise<StateResponse> {
         switch (this.stage) {
-        case BroadcastStage.validation:
-            if (message.body == this.validationCode) {
-                this.stage = BroadcastStage.broadcast;
-                return new StateResponse(this, new MessageResponse(this.botMessages.sendBroadcast));
-            }
-            return new StateResponse(new WelcomeState(this.db), new MessageResponse("שגיאה", [{chat: "972544917728", response: `${user_id} ניסה לשלוח הודעת שידור`}]))
+            case BroadcastStage.validation:
+                if (message.body == this.validationCode) {
+                    this.stage = BroadcastStage.broadcast;
+                    return new StateResponse(this, new MessageResponse(this.botMessages.sendBroadcast));
+                }
+                return new StateResponse(new WelcomeState(this.db), new MessageResponse("שגיאה", [{ chat: "972544917728", response: `${user_id} ניסה לשלוח הודעת שידור` }]))
 
-        case BroadcastStage.broadcast:
-            // Send to all
-            return new StateResponse(new WelcomeState(this.db), new MessageResponse("משדר:\n" + message.body))
+            case BroadcastStage.broadcast:
+                // Send to all
+                var users: User[] = await this.db.getBroadcastUsers();
+                var responses = users.map((user) => { return { chat: user.phone_number, response: message.body }; });
+                return new StateResponse(new WelcomeState(this.db), new MessageResponse("משדר:\n" + message.body))
         }
     }
 }
