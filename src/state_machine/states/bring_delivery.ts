@@ -87,7 +87,6 @@ export class BringDeliveryState implements State {
     user: User;
     deliveries: DeliveryRequest[];
     deliveryIndex: number = 0;
-    missingDeliveries: number = 0;
     deliverySource: Source;
     deliveryPrice: number;
 
@@ -180,7 +179,6 @@ ${delivery.content}
 
                     default:
                         var price = parseFloat(message.body)
-                        console.log(price);
                         if (isNaN(price)) {
                             return new StateResponse(this, new MessageResponse(botMessages.notNumber));
                         }
