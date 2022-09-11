@@ -36,7 +36,9 @@ const botMessages = {
 תודה על הג׳סטה בכל זאת🙇`,
 
     priceRequest: `תודה רבה על הג׳סטה😍
-כמה עלה לך המשלוח?`,
+כמה עלה לך המשלוח?
+
+*אין בשקם* - אם המוצר לא במלאי😔`,
 
     notImage: `אני לא חושב שזאת תמונה😅
 בשביל לסיים את הג׳סטה אני צריך רק תמונה של השקית בעמדת המשלוחים📸`,
